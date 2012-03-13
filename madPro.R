@@ -776,7 +776,7 @@ if(ratio!="FALSE" & bicoul == FALSE){
   write.table(finalPV,file=paste(path,"/",projet,"-allpval.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
   write.table(finalFC,file=paste(path,"/",projet,"-allFC.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
   tex_genDiff(tabGenDiff)
-	print"FIN"
+	print("FIN")
 
 }
 	  

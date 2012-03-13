@@ -1,9 +1,6 @@
 `arrayCDTimage` <-
 function(matCDT,matArray,fileArray="array.txt", fileMap="map.txt", fileimg="output",map=TRUE){
-#	matCDT<-as.matrix(matCDT)
-#	matArray<-as.factor(matArray)
-
-	#check colonnes
+#Fonction qui creer une image png avec le logiciel matrix2png
 	if(!all(colnames(matCDT) == colnames(matArray))){
 			matArray<-matArray[,colnames(matCDT)]
 		}
