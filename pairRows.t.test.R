@@ -2,11 +2,6 @@
 function(comparaison_vect,mat,f,padj.method="none",pas=200,path=".",graph=TRUE,projet=""){
 	f<-as.matrix(f)
 	require(genefilter)
-#-	l=levels(as.factor(f))
-#-	print(paste("levels :",l,sep=" "))
-#-	nbClasse = length(l)
-#-	print(paste("nbClasse :",nbClasse,sep=" "))
-#-	n <- 2
 	mat<-as.matrix(mat)
 	
 	comparaison_name <-paste(comparaison_vect[1],comparaison_vect[2],sep="-Vs-")
