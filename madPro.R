@@ -1,5 +1,5 @@
 `madPro` <-
-function(pSetupFile="pSetup.txt",savingData=TRUE,importData=TRUE,rmCTRL=TRUE,isCompar=FALSE,Normalise=TRUE,statBeforNorm=TRUE,statBeforeNorm=TRUE,clusteringALEA=TRUE,Filtrage=TRUE,Cluster=TRUE,tStat=TRUE,rmArray=FALSE){
+function(pSetupFile="pSetup.txt",savingData=TRUE,importData=TRUE,rmCTRL=TRUE,isCompar=FALSE,Normalise=TRUE,statBeforNorm=TRUE,statBeforeNorm=TRUE,clusteringALEA=TRUE,Filtrage=TRUE,Cluster=TRUE,tStat=TRUE,rmArray=FALSE,Annotation=FALSE){
 
 #Package a charger pour l'excussion du script
 require("limma")
@@ -213,7 +213,15 @@ if(rmArray == TRUE){
 		CheckError=TRUE
 	}
 }
-
+if(!is.null(pSetup$species)){
+	species = as.character(pSetup$species)
+	if(species == "h" || species == "m" || species == "r" || species == "d"){
+		Annotation=TRUE
+	}else{
+		stop("Espece pour l'annotation incorecte h : Human, m : Mouse : r : Rat , d : Chien")
+	}
+	
+}
 if(CheckError){
 	stop("Il y a eu ",nError," erreurs lors du setup du pipeline veillez regarder le fichier error.log pour les corriger" )
 }
@@ -647,6 +655,13 @@ finalFC <- NULL
 sStrict <- 0.0001
 sLache <- 0.001
 path<-paste(projet,"-05-student",sep="")
+
+if(Annotation && !is.null(infoGeneAnot$GeneName){
+	pathAnot<-paste(projet,"-06-annotation",sep="")
+	filePuce<-paste(pathAnot,"/",projet,"-puce.txt",sep="")
+	write.table(infoGeneAnot$GeneName,filePuce,sep="\t",quote=FALSE,row.names=FALSE,col.names=FALSE)
+	
+}
 if(ratio!="FALSE" & bicoul == FALSE){
   
   pvalue<-testLogRatio(mat=m.filtered,projet=projet,path=path)
@@ -768,6 +783,23 @@ if(ratio!="FALSE" & bicoul == FALSE){
 	  write.table(upLache,file=paste(pathDir,"/",projet,"-",versus,"-up.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
 	  write.table(downLache,file=paste(pathDir,"/",projet,"-",versus,"-down.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
 
+	#Fichiers pour l'annotation de toutes les listes
+	if(Annotation && !is.null(infoGeneAnot$GeneName)){
+
+		fileList<-paste(pathAnot,"/",projet,"-listeFile.txt",sep="")
+		upAnotFile<-paste(pathAnot,"/",projet,"-",versus,"-upAnot.txt",sep="")
+		downAnotFile<-paste(pathAnot,"/",projet,"-",versus,"-downAnot.txt",sep="")
+		cat(upAnotFile,"\n",downAnotFile,file=fileList,append=TRUE,sep="")
+		GeneName<-infoGeneAnot$GeneName
+		names(GeneName)<-rownames(infoGeneAnot)
+		upAnot<-GeneName[rownames(upLache)]
+		downAnot<-GeneName[rownames(downLache)]
+		write.table(upAnot,file=upAnotFile,row.names=FALSE,col.names=FALSE,quote=FALSE,sep="\t")
+		write.table(downAnot,file=downAnotFile,row.names=FALSE,col.names=FALSE,quote=FALSE,sep="\t")
+
+
+	}
+
 
 	  write.table(syntheseStat,file=paste(pathDir,"/",projet,"-",versus,"-allSynth.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
 				
@@ -776,6 +808,14 @@ if(ratio!="FALSE" & bicoul == FALSE){
   write.table(finalPV,file=paste(path,"/",projet,"-allpval.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
   write.table(finalFC,file=paste(path,"/",projet,"-allFC.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
   tex_genDiff(tabGenDiff)
+	if(Annotation){
+		resultDir<-paste(pathAnot,"/resultat",sep="")
+		commandAnnotation<-paste("gominer -p ",filePuce," -f ",fileList, " -s ", species, " -r ", resultDir,sep="")
+		system(commandAnnotation)
+		filesGominer<-dir(path=resultDir, pattern="S_*")
+
+		
+	}
 	print("FIN")
 
 }
