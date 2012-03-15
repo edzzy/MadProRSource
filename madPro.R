@@ -653,7 +653,7 @@ print("test stat")
 finalPV <- NULL
 finalFC <- NULL
 sStrict <- 0.0001
-sLache <- 0.001,
+sLache <- 0.001
 path<-paste(projet,"-05-student",sep="")
 
 if(Annotation && !is.null(infoGeneAnot$GeneName){
