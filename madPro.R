@@ -12,7 +12,7 @@ CheckError=FALSE
 print("Debut Setup de l'analyse")
 if(!file.exists(pSetupFile))
   stop("Le fichier", pSetupFile," n'est pas present")
-pSetup<-read.delim("pSetup.txt",row.names=1,header=FALSE,stringsAsFactors=FALSE,sep="\t")
+pSetup<-read.delim(pSetupFile,row.names=1,header=FALSE,stringsAsFactors=FALSE,sep="\t")
 pSetup<-t(pSetup)
 pSetup<-as.data.frame(pSetup)
 if(nrow(pSetup) != 1)
