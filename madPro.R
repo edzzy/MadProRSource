@@ -1,5 +1,5 @@
 `madPro` <-
-function(pSetupFile="pSetup.txt",savingData=TRUE,importData=TRUE,rmCTRL=TRUE,isCompar=FALSE,Normalise=TRUE,statBeforNorm=TRUE,statBeforeNorm=TRUE,clusteringALEA=TRUE,Filtrage=TRUE,Cluster=TRUE,tStat=TRUE,rmArray=FALSE){
+function(pSetupFile="pSetup.txt",savingData=TRUE,importData=TRUE,rmCTRL=TRUE,isCompar=FALSE,Normalise=TRUE,statBeforNorm=TRUE,statBeforeNorm=TRUE,clusteringALEA=TRUE,Filtrage=TRUE,Cluster=TRUE,tStat=TRUE,rmArray=FALSE,Annotation=FALSE){
 
 #Package a charger pour l'excussion du script
 require("limma")
@@ -213,7 +213,15 @@ if(rmArray == TRUE){
 		CheckError=TRUE
 	}
 }
-
+if(!is.null(pSetup$species)){
+	species = as.character(pSetup$species)
+	if(species == "h" || species == "m" || species == "r" || species == "d"){
+		Annotation=TRUE
+	}else{
+		stop("Espece pour l'annotation incorecte h : Human, m : Mouse : r : Rat , d : Chien")
+	}
+	
+}
 if(CheckError){
 	stop("Il y a eu ",nError," erreurs lors du setup du pipeline veillez regarder le fichier error.log pour les corriger" )
 }
