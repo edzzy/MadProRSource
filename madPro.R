@@ -656,7 +656,7 @@ sStrict <- 0.0001
 sLache <- 0.001
 path<-paste(projet,"-05-student",sep="")
 
-if(Annotation && !is.null(infoGeneAnot$GeneName){
+if(Annotation && !is.null(infoGeneAnot$GeneName)){
 	pathAnot<-paste(projet,"-06-annotation",sep="")
 	filePuce<-paste(pathAnot,"/",projet,"-puce.txt",sep="")
 	write.table(infoGeneAnot$GeneName,filePuce,sep="\t",quote=FALSE,row.names=FALSE,col.names=FALSE)
