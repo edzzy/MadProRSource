@@ -720,17 +720,21 @@ if(ratio!="FALSE" & bicoul == FALSE){
 	  		dir.create(pathDir)
 	  	result_pval <-pairRows.t.test(comparaison[,i],m.filtered,frameFac,padj.method="none",path=path,graph=TRUE,projet=projet)
 	  	fileMatrix <-paste(projet,"-04-filtre/",projet,"-matrix-filtreeMatrix.png",sep="")
+	
 	  	fileTree <- paste(projet,"-04-filtre/atr.",projet,"-matrix-filtreeArrayNoName.png ",sep="")
 	  	fileOut<-paste(projet,"-05-student/",projet,"-Cluster-",versus,".png",sep="")
+		fileOut<-gsub("_","-",fileOut)
 	  	fileGraph<-paste(projet,"-05-student/",projet,versus,".png",sep="")
 	  	montageMont<-paste("madProMontage.pl -b ",outfileColor," -m ",fileMatrix," -t ",fileTree," -g ",fileGraph," -o ",fileOut,sep="")
 		system(montageMont)
+
 	 if(i == 1){
 	 	appendFirst = FALSE
 	 }else{
 	 	appendFirst = TRUE
 	 }
-	  tex_clusterImage(fileOut,paste("rapport/graphCluster.tex",sep=""),versus,appendFirst,projet)
+
+	  tex_clusterImage(fileOut, paste("rapport/graphCluster.tex",sep=""),versus,appendFirst,projet)
 	 	if(is.null(fileTexCluster)){
 	 		fileTexCluster<-paste(versus,".tex",sep="")
 	 	}else{
@@ -820,7 +824,7 @@ if(ratio!="FALSE" & bicoul == FALSE){
 	  write.table(syntheseStat,file=paste(pathDir,"/",projet,"-",versus,"-allSynth.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
 				
   }
-	tex_question(fileTexCluster,paste("rapport/graphCluster.tex",sep=""))
+#	tex_question(fileTexCluster,paste("rapport/graphCluster.tex",sep=""))
   write.table(finalPV,file=paste(path,"/",projet,"-allpval.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
   write.table(finalFC,file=paste(path,"/",projet,"-allFC.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
   tex_genDiff(tabGenDiff)

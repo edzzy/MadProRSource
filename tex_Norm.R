@@ -1,9 +1,8 @@
 tex_norm<-function(projet,filesNorm){
   
-  cat("\\begin{figure}[H]\n
-    \\centering\n
-    \\begin{tabular}{cc}\n", file = "rapport/graphNorm.tex",append=FALSE)
-  include<-"\\includegraphics[scale=0.10]{"
+  cat("\\setlongtables\n
+    \\begin{longtables}{cc}\n", file = "rapport/graphNorm.tex",append=FALSE)
+  include<-"\\includegraphics[scale=0.15]{"
   carac<-"}& \n"
   for(i in 1:length(filesNorm)){
       if (i %% 2 == 0){
@@ -14,8 +13,8 @@ tex_norm<-function(projet,filesNorm){
       includeTex<-paste(include,"../",filesNorm[i],carac,sep="")
       cat(includeTex,file="rapport/graphNorm.tex",append=TRUE)
     }
-  cat("\\end{tabular}\n
+  cat("
         \\caption{\\label{Norm}Graphiques des distributions des échantillons avant et après normalisation contre le profil médian et graphique des distribution avant/après d'un même échantillon}\n
-\\end{figure}\n",
+\\end{longtables}\n",
   file="rapport/graphNorm.tex", append=TRUE)
 }
