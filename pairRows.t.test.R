@@ -39,8 +39,8 @@ function(comparaison_vect,mat,f,padj.method="none",pas=200,path=".",graph=TRUE,p
 	nameFile=paste(path,"/",projet,"-allPval-",comparaison_name,".txt",sep="")
 
 	if(graph==TRUE){
-		m1<-meanByFact(CC,ff,comparaison_vect[1])
-		m2<-meanByFact(CC,ff,comparaison_vect[2])
+		m1<-meanByFact(mat,f,comparaison_vect[1])
+		m2<-meanByFact(mat,f,comparaison_vect[2])
 		tabmean<-cbind(m1,m2,pval)
 		pv<-apply(tabmean,1,graphClustPval)
 	#	pv<-as.numeric(pval)

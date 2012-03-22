@@ -28,7 +28,7 @@ tex_filtrage<-function(projet,annotFilter,seuil,initialProbe,conserveProbe, nval
   	",file="rapport/filtrage.tex",append=TRUE)
     
   	clusterFile<-paste("\\includegraphics[scale=0.20]{../",projet,"-03-clusterAleatoire/",projet,"-filtrageCluster.png} \\\\\n",sep="")
-  	clusterLegend<-paste("\\includegraphics[scale=0.20]{../",projet,"-03-clusterAleatoire/Legende-sample.png}\\\\\n",sep="")
+  	clusterLegend<-paste("\\includegraphics[scale=0.20]{../",projet,"-03-clusterAleatoire/Legende-",projet,"-colorSample.png}\\\\\n",sep="")
 	clusterTree<-paste("\\includegraphics[scale=0.20]{../",projet,"-03-clusterAleatoire/",projet,"-TreeArraycolor.png} \\\\\n",sep="")  
   
   cat(clusterFile,clusterLegend,clusterTree,file="rapport/filtrage.tex",append=TRUE)
