@@ -1,3 +1,4 @@
+library(RUnit)
 test.arrayCDTimage.R<-function(){}
 test.calculeNorm.R<-function(){}
 test.clusterbyPair.R<-function(){}
@@ -36,7 +37,14 @@ test.FC.R<-function(){
 test.filtrage_non_exprimes.R<-function(){}
 test.fusionCluster.R<-function(){}
 test.getUpDown.R<-function(){}
-test.graphClustPval.R<-function(){}
+test.graphClustPval.R<-function(){
+	source("graphClustPval.R")
+
+	checkEquals(graphClustPval(c(1,2,0.001)),-3)
+	checkEquals(graphClustPval(c(2,1,0.001)),3)
+	checkEquals(graphClustPval(c(2,1,NA)),NA)
+	checkEquals(graphClustPval(c(2,2,0.001)),-3)
+}
 test.graphMmobile.R<-function(){}
 test.invariant.R<-function(){}
 test.LOWESS.R<-function(){}

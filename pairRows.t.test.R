@@ -44,7 +44,7 @@ function(comparaison_vect,mat,f,padj.method="none",pas=200,path=".",graph=TRUE,p
 		tabmean<-cbind(m1,m2,pval)
 		pv<-apply(tabmean,1,graphClustPval)
 	#	pv<-as.numeric(pval)
-		graphMmobile(filename,-log10(pval),pas=pas,title=comparaison_name,seuil=0)
+		graphMmobile(filename,pv,pas=pas,title=comparaison_name,seuil=0)
 	}
   return(pval)
 }

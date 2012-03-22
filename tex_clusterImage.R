@@ -1,4 +1,4 @@
-tex_clusterImage<-function(fileCluster,tex_file,versus,appendFirst){
+tex_clusterImage<-function(fileCluster,tex_file,versus,appendFirst,projet){
 	
  section<-paste("\\subsubsection*{Comparaison : ,", versus,"}\n")
 	cat(section,file=tex_file,append=appendFirst)

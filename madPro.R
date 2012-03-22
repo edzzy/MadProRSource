@@ -1,5 +1,5 @@
 `madPro` <-
-function(pSetupFile="pSetup.txt",savingData=TRUE,importData=TRUE,rmCTRL=TRUE,isCompar=FALSE,Normalise=TRUE,statBeforNorm=TRUE,statBeforeNorm=TRUE,clusteringALEA=TRUE,Filtrage=TRUE,Cluster=TRUE,tStat=TRUE,rmArray=FALSE,Annotation=FALSE){
+function(pSetupFile="pSetup.txt",savingData=TRUE,importData=TRUE,rmCTRL=TRUE,isCompar=FALSE,Normalise=TRUE,statBeforNorm=TRUE,statBeforeNorm=TRUE,clusteringALEA=TRUE,Filtrage=TRUE,Cluster=TRUE,tStat=TRUE,rmArray=FALSE,Annotation=FALSE,testUnit=FALSE){
 
 #Package a charger pour l'excussion du script
 require("limma")
@@ -18,7 +18,9 @@ pSetup<-as.data.frame(pSetup)
 if(nrow(pSetup) != 1)
 	stop("Mauvais formatage du fichier ",pSetupFile,". Nombre de colone > 1. Veuillez vérifier si il n'existe pas de tabulations parasite en fin de lignes.") 
 cat("\n",date(),"\n",file="error.log",append=TRUE)
+
 #-Import/Verification du nom de projet
+
 if(!is.null(pSetup$Projet)){
 	projet<-as.character(pSetup$Projet)
 }else{
@@ -28,6 +30,7 @@ if(!is.null(pSetup$Projet)){
 }
 
 #-Import/Verification du prefixe des noms des matrices. 
+
 if(!is.null(pSetup$nom)){
 	nom_fichier <- as.character(pSetup$nom)
 }else{
@@ -50,7 +53,9 @@ if(!is.null(pSetup$typeArray)){
 	cat("Le type d'array n'est pas spécifié dans le fichier : ", pSetupFile,"\n", file="error.log",append=TRUE)
 	nError <- nError +1
 }
+
 #nombre de sondes pour la test matrice aleatoire.
+
 if(!is.null(pSetup$alea)){
 	alea<-as.numeric(as.character(pSetup$alea))
 	if(alea < 0 | alea > 100){
@@ -65,6 +70,7 @@ if(!is.null(pSetup$alea)){
 }
 
 #Fichier annotation des echantillons
+
 if(!is.null(pSetup$fileEch)){
 	fileEch<-as.character(pSetup$fileEch)
 	if(!file.exists(fileEch)){
@@ -79,6 +85,7 @@ if(!is.null(pSetup$fileEch)){
 
 }
 ###
+
 if(!is.null(pSetup$fileGene)){
 	fileGene<-as.character(pSetup$fileGene)
 	if(!file.exists(fileGene)){
@@ -142,6 +149,7 @@ if(!is.null(pSetup$dye)){
 		nError <- nError +1
 }
 ##-Test parametre si le fichier contenant les controles est présents.
+
 if(rmCTRL == TRUE){
 	if(!is.null(pSetup$controle)){
 		controle<-as.character(pSetup$controle)
@@ -253,13 +261,15 @@ print ("fin annotation des echantillons")
 
 
 namesFiles<-frameSample$nomFichiers
+
 if(fileGene != ""){
   test<- dir(pattern=fileGene)
   answer<-paste("le fichier :",fileGene,"n'est pas present",sep=" ")
   if(!file.exists(fileGene))
     stop("Le fichier : ", fileGene," n'est pas present", sep="")
-	namesGenes<-read.delim(fileGene,header=FALSE)
-	namesGenes=unlist(namesGenes[,1])
+	#infoGene<-read.delim(fileGene,header=TRUE,row.names=1,sep="\t")
+	namesGenes=read.delim(fileGene,header=FALSE,sep="\t")
+	namesGenes<-unlist(as.character(namesGenes[,1]))
 }else{
 	namesGenes<-c()
 }
@@ -280,6 +290,7 @@ if(typeArray == "GPR"){
 	
 }else if(typeArray=="AG"){
   
+  
   files<- dir(path=dirFile,pattern="U.*\\.txt$")
   #on change de repertoire
   
@@ -287,7 +298,7 @@ if(typeArray == "GPR"){
     	stop("Non correspondance entre les noms du fichiers d'annotation et les noms reels")
 
     	files<-paste(dirFile,files,sep="/")
-	dataMA<-read_Agilent(namesArray=namesArray,files=files,namesGenes=namesGenes,dye=dye,type="AG")
+		dataMA<-read_Agilent(namesArray=namesArray,files=files,namesGenes=namesGenes,dye=dye,type="AG")
 
 	if(geneAnnot == TRUE){
 		fileName<- paste(projet,"-",nom_fichier,"-rawdataCtrlInfo.txt",sep="")
@@ -440,13 +451,17 @@ if (clusteringALEA == TRUE){
 	sampleMPrefixShort = paste(projet,"-",nom_fichier,alea,"sample",sep="")
 	sampleMName<-paste(sampleMPrefix,".txt",sep="")
 	write.table(sampMatrix,sampleMName,quote=FALSE,sep="\t",col.names=NA,row.names=TRUE)
-	print("debut clustering matrice aleatoire")
 
 ################
 ###Cluster######
-	commandCluster<-paste(" cluster -f ",sampleMName," -l  -cg m -g 1 -e 1  -m c",sep="")
-	system(commandCluster)
+	if(testUnit == FALSE){
+	print("debut clustering matrice aleatoire")
+		commandCluster<-paste(" cluster -f ",sampleMName," -l  -cg m -g 1 -e 1  -m c",sep="")
+		system(commandCluster)
 	print("fin clustering matrice aleatoire")
+	}else{
+		sampMatrix<-read.delim(sampleMName, header=TRUE,sep="\t",row.names=1)
+	}
 	commandSlcviewMatrix<-paste("slcview.pl ",sampleMPrefix,".cdt -xsize 25 -height 1300 -genelabel 0 -gtrresolution 0 -arraylabels 0 -atrresolution 0 -o ",sampleMPrefix,"Matrix.png" ,sep="" )
 	
 	system(commandSlcviewMatrix)
@@ -570,12 +585,13 @@ if(ratio != "FALSE"){
 #filterName<-paste(projet,"-04-filtre/",projet,"-matrix_filtree.txt",sep="")
 write.table(m.filtered,filterName,col.names=NA,row.names=TRUE,sep="\t",quote=FALSE)
 ################Clustering de la matrice totale
-print("debut clustering matrice totale")
-commandCluster<-paste(" cluster -f ",filterName," -l  -cg m -g 1 -e 1  -m c",sep="")
+if(testUnit==FALSE){
+	print("debut clustering matrice totale")
+	commandCluster<-paste(" cluster -f ",filterName," -l  -cg m -g 1 -e 1  -m c",sep="")
 system(commandCluster)
 
 print("fin clustering matrice totale")
-
+}
 	commandSlcviewMatrix<-paste("slcview.pl ",filterMPrefix,".cdt -xsize 25 -height 1300 -genelabel 0 -gtrresolution 0 -arraylabels 0 -atrresolution 0 -o ",filterMPrefix,"Matrix.png" ,sep="" )
 	
 	system(commandSlcviewMatrix)
@@ -714,7 +730,7 @@ if(ratio!="FALSE" & bicoul == FALSE){
 	 }else{
 	 	appendFirst = TRUE
 	 }
-	  tex_clusterImage(fileOut,paste("rapport/graphCluster.tex",sep=""),versus,appendFirst)
+	  tex_clusterImage(fileOut,paste("rapport/graphCluster.tex",sep=""),versus,appendFirst,projet)
 	 	if(is.null(fileTexCluster)){
 	 		fileTexCluster<-paste(versus,".tex",sep="")
 	 	}else{
