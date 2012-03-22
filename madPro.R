@@ -805,7 +805,7 @@ if(ratio!="FALSE" & bicoul == FALSE){
 		fileList<-paste(pathAnot,"/",projet,"-listeFile.txt",sep="")
 		upAnotFile<-paste(pathAnot,"/",projet,"-",versus,"-upAnot.txt",sep="")
 		downAnotFile<-paste(pathAnot,"/",projet,"-",versus,"-downAnot.txt",sep="")
-		cat(upAnotFile,"\n",downAnotFile,file=fileList,append=TRUE,sep="")
+		cat(upAnotFile,"\n",downAnotFile,"\n",file=fileList,append=TRUE,sep="")
 		GeneName<-infoGeneAnot$GeneName
 		names(GeneName)<-rownames(infoGeneAnot)
 		upAnot<-GeneName[rownames(upLache)]
