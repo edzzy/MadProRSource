@@ -1,6 +1,7 @@
 `LOWESS` <-
 function(nom_fichier,data,pngDir,profil.median="NA",graph=1,projet=stop("nom de projet manquant"))
 {
+	
 	nomGenes=rownames(data)
 	nomEchan = colnames(data)
 	

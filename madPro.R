@@ -384,7 +384,7 @@ fd<-paste(projet,"-02-normalisation/",sep="")
 dataN<-LOWESS(nom_fichier=nom_fichier,data=dataMA,pngDir=fd,profil.median="NA",graph=1,projet=projet)
 
 if(geneAnnot == TRUE){
-	fileName<- paste(fd,"/",projet,"-",nom_fichier,"-rawdataInfo.txt",sep="")
+	fileName<- paste(fd,"/",projet,"-",nom_fichier,"-normalisationInfo.txt",sep="")
 	tmpinfoGene<-infoGeneAnot[rownames(dataN),]
 	tmpDataMA<-cbind(tmpinfoGene,dataN)
 	write.table(tmpDataMA,fileName,col.names=NA,sep="\t",quote=FALSE,row.names=TRUE);
@@ -405,7 +405,7 @@ print("Fin Normalisation")
 ###################################
 
 
-###GRAPHIQUE APRES NORMALISATION#####
+###GRAPHIQUE APRES NORMALISnormalisatioaATION#####
 ##creation du boxplot
 print("Boxplot Norm")
 output_name = paste(fd,projet,"-",nom_fichier,"-lowess.boxplot1.jpeg",sep="")
@@ -439,7 +439,7 @@ tex_Corre(projet,echBadCor,echBadCorNorm,nom_fichier)
 
 
 if(savingData == TRUE){
-	save(frameFacMA,dataMA,file=paste(projet,"-dataRaw.Rdata",sep=""))
+	save(projet,frameFacMA,dataMA,file=paste(projet,"-dataRaw.Rdata",sep=""))
 }
 ##############################
 #creation d'une matrice reduite
@@ -553,7 +553,7 @@ system(montageTree)
 	system(rotateTree)
 }
 if(savingData == TRUE){
-	save(frameFacN,dataN,sampMatrix,file=paste(projet,"-dataNorm.Rdata",sep=""))
+	save(projet,frameFacN,dataN,sampMatrix,file=paste(projet,"-dataNorm.Rdata",sep=""))
 }
 ####Filtrage matrice totale
 print("filtrage matrice totale")
@@ -624,11 +624,7 @@ nG<-as.character(nG)
  m.filtered<-m.filtered[nG,]
  frameFacF<-frameFac
  rm(matcdt)
-#if(is.null(colnames(frameFac))){
-#frameFac<-frameFac[match(colnames(m.filtered),names(frameFac))]
-#}else{
-#frameFac<-frameFac[,match(colnames(m.filtered),colnames(frameFac))]
-#}
+
 ########Utilisation de matrix2png pour visualation des parametres
 frameNames<-paste(projet,"-04-filtre/",projet,"-frameFacF.txt",sep="")
 write.table(frameFac,frameNames,sep="\t",row.names=FALSE,quote=FALSE);
@@ -638,18 +634,11 @@ system(colorName)
 
 montageTree<-paste("montage ",projet,"-04-filtre/atr.",projet,"-matrix-filtreeArray.png ",outfileColor," -geometry +0+0 -tile 1x ",projet,"-04-filtre/",projet,"-TreeArraycolor.png",sep="")
 system(montageTree)
-	fileTree=paste(projet,"-04-filtre/",projet,"-TreeArraycolor.png",sep="")
-	rotateTree<-paste("convert ",fileTree, " -rotate 90 ",fileTree,sep="")
-	system(rotateTree)
-#ffm2p<-createMatrix2png(frameFac)
+fileTree=paste(projet,"-04-filtre/",projet,"-TreeArraycolor.png",sep="")
+rotateTree<-paste("convert ",fileTree, " -rotate 90 ",fileTree,sep="")
+system(rotateTree)
 
 
-#outfile<-paste(projet,"-04-filtre/",projet,"-colorSample.png",sep="")
-#colorName<-paste("matrix2png -size 24:24  -r -s -dmap ", mapName, " -data " , frameNames ,"  > ", outfile,sep="")
-#system(colorName)
-
-#outfile<-paste(projet,"-04-filtre/",projet,"-colorSample2.png",sep="")
-#colorName<-paste("matrix2png -size 24:24   -dmap ", mapName, " -data " , frameNames ,"  > ", outfile,sep="")
 
 #system(colorName)
 if(geneAnnot == TRUE){
@@ -662,7 +651,7 @@ if(geneAnnot == TRUE){
 }
 
 if(savingData == TRUE){
-	save(filterParam,ffm2p,m.filtered,frameFac,file=paste(projet,"-dataFilter.Rdata",sep=""))
+	save(,projet,filterParam,ffm2p,m.filtered,frameFac,file=paste(projet,"-dataFilter.Rdata",sep=""))
 }
 ##########test stat
 print("test stat")
