@@ -1,6 +1,5 @@
 detectCluster<-function(pval,seuil=1,seuilCluster=150,pas=200 ){
 	require(genefilter)
-	
 	value<- -log10(pval)
 	curveMobile<-rep(1/pas,pas)
 	fil<-filter(value,curveMobile)
