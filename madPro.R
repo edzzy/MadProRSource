@@ -651,7 +651,7 @@ if(geneAnnot == TRUE){
 }
 
 if(savingData == TRUE){
-	save(,projet,filterParam,ffm2p,m.filtered,frameFac,file=paste(projet,"-dataFilter.Rdata",sep=""))
+	save(projet,filterParam,ffm2p,m.filtered,frameFac,file=paste(projet,"-dataFilter.Rdata",sep=""))
 }
 ##########test stat
 print("test stat")
