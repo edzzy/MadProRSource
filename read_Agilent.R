@@ -64,7 +64,7 @@ function(namesArray,files,type,namesGenes,dye=2){
 	RG<-read.maimages(files,source=source,columns=cols,other.columns=other.col)
 
 		if(dye == 2){
-			data<-cbind(RG$G,RG$R)
+			data<-cbind(RG$R,RG$G)
 		}else {
 			data<-RG$G
 		}
