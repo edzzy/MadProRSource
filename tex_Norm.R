@@ -1,6 +1,6 @@
 tex_norm<-function(projet,filesNorm){
   
-  cat("\\setlongtable\n
+  cat("\\setlongtables\n
     \\begin{longtable}{cc}\n", file = "rapport/graphNorm.tex",append=FALSE)
   include<-"\\includegraphics[scale=0.15]{"
   carac<-"}& \n"
