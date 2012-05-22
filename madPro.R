@@ -830,6 +830,8 @@ if(ratio!="FALSE" & bicoul == FALSE){
 
 		
 	}
+	info<-sessionInfo()
+	cat(info,file=logNames,append=TRUE)
 	print("FIN")
 
 }
