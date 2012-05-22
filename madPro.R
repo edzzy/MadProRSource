@@ -830,8 +830,8 @@ if(ratio!="FALSE" & bicoul == FALSE){
 
 		
 	}
-	info<-sessionInfo()
-	cat(info,file=logNames,append=TRUE)
+	info<-toLatex(sessionInfo(),local=FALSE)
+	write(info,"rapport/info.tex")
 	print("FIN")
 
 }
