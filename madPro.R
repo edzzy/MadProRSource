@@ -830,6 +830,8 @@ if(ratio!="FALSE" & bicoul == FALSE){
 
 		
 	}
+	info<-toLatex(sessionInfo(),local=FALSE)
+	write(info,"rapport/info.tex")
 	print("FIN")
 
 }
