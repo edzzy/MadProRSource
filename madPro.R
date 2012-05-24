@@ -821,7 +821,7 @@ if(ratio!="FALSE" & bicoul == FALSE){
 		resultDir<-paste(pathAnot,"/resultat",sep="")
 		commandAnnotation<-paste("gominer -p ",filePuce," -f ",fileList, " -s ", species, " -r ", resultDir,sep="")
 		system(commandAnnotation)
-		filesGominer<-dir(path=resultDir, pattern="S_*")
+		filesGominer<-dir(path=resultDir, pattern="^S_*")
 		for (i in 1:length(filesGominer)){
 			fileNamesGominer<-"rapport/annotGeneDiff.tex"
 			tmpFiles<-paste(resultDir,"/",filesGominer[i],sep="")
