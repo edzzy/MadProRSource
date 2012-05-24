@@ -35,10 +35,12 @@ function(nom_fichier,data,pngDir,profil.median="NA",graph=1,projet=stop("nom de 
 	
 	# Calcul de la matrice normalisee
 	increm=c(1:dim(data)[2])
-	matNormlog = sapply(increm, calculeNorm, log(matOrdonne), lowessCurve, log(profilOrdonne))
-	matNorm=exp(matNormlog) 	
+#	matNormlog = sapply(increm, calculeNorm, log(matOrdonne), lowessCurve, log(profilOrdonne))
+#	matNorm = sapply(increm, calculeNorm, log(matOrdonne), lowessCurve, log(profilOrdonne))
+#	matNorm=exp(matNormlog) 	
+	matNorm = sapply(increm, calculeNorm, matOrdonne, exp(lowessCurve), profilOrdonne)
 	
-  profilMedNorm = apply(matNorm,1,median,na.rm=TRUE)
+	profilMedNorm = apply(matNorm,1,median,na.rm=TRUE)
 	
 	
   if(graph==1){	
