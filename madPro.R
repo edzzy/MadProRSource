@@ -645,7 +645,7 @@ if(geneAnnot == TRUE){
 	filterName<-paste(projet,"-04-filtre/",projet,"-matrix_filtreeInfo.txt",sep="")
 	tmpinfoGene<-infoGeneAnot[rownames(m.filtered),]
 	tmpDataMA<-cbind(tmpinfoGene,m.filtered)
-	write.table(tmpDataMA,fileName,col.names=NA,sep="\t",quote=FALSE,row.names=TRUE);
+	write.table(tmpDataMA,filterName,col.names=NA,sep="\t",quote=FALSE,row.names=TRUE);
 	rm(tmpDataMA)
 
 }
