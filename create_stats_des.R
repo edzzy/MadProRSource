@@ -21,13 +21,13 @@ function (data,output_name,minMax=TRUE){
     v1=dataSortedBySample[nbgenes,]
     v10=dataSortedBySample[nbgenes-9,]
     v100=dataSortedBySample[nbgenes-99,]
-    v1000=dataSortedBySample[nbgenes-999,]
+    if(nbgenes>999){v1000=dataSortedBySample[nbgenes-999,]}
     if(nbgenes>9999){v10000=dataSortedBySample[nbgenes-9999,]}
     if(nbgenes>19999){v20000=dataSortedBySample[nbgenes-19999,]}
     v1p=dataSortedBySample[1,]
     v10p=dataSortedBySample[1+9,]
     v100p=dataSortedBySample[1+99,]
-    v1000p=dataSortedBySample[+999,]
+    if(nbgenes>999){v1000p=dataSortedBySample[+999,]}
     if(nbgenes>9999){v10000p=dataSortedBySample[1+9999,]}
     if(nbgenes>19999){v20000p=dataSortedBySample[1+19999,]}
 
@@ -44,16 +44,28 @@ function (data,output_name,minMax=TRUE){
 	if(minMax){
 		lines(v1, col="black")
 		lines(v10, col="red")
-		legend=c("valeur max","10eme plus grande valeur","100eme plus grande valeur","1000eme plus grande valeur")
-		col=c("black","red","blue","green")
+		legend=c("valeur max","10eme plus grande valeur","100eme plus grande valeur")
+		col=c("black","red","blue")
 	}else{
-		legend=c("100eme plus grande valeur","1000eme plus grande valeur")
-		col=c("blue","green")
+		legend=c("100eme plus grande valeur")
+		col=c("blue")
 	}
 
 
 	lines(v100, col="blue")
-    lines(v1000, col="green")
+
+
+	if(exists("v1000")){
+		lines(v1000, col="green")
+		legendtmp<-c("1000 plus grande valeur")
+    	coltmp<-c("green")
+    	ltytmp<-1
+
+		legend<-c(legend,legendtmp)
+    	col<-c(col,coltmp)
+    	lty<-c(lty,ltytmp)
+
+	}
     lty<- rep(1,4)
     if(exists("v10000")){
     	lines(v10000, col="orange")
@@ -82,8 +94,18 @@ function (data,output_name,minMax=TRUE){
 	}
 	
     lines(v100p, col="green",lty=5)
-    lines(v1000p, col="red",lty=5)
+
     legendp<-NULL	
+	if(exists("v1000p")){
+		lines(v1000p, col="red",lty=5)
+		legendp<-c("1000eme petite valeur")
+        coltmp<-c("red")
+        ltytmp<-5                                            
+       col<-c(col,coltmp)
+       lty<-c(lty,ltytmp)
+
+
+	}
     if(exists("v20000p")){
     	lines(v20000p, col="grey",lty=5)
     	legendp<-c("20000eme petite valeur")
@@ -102,12 +124,23 @@ function (data,output_name,minMax=TRUE){
        col<-c(col,coltmp)
        lty<-c(lty,ltytmp)
 	 }
+	if(exists("v1000p")){
+		lines(v1000p, col="red",lty=5)
+		legendp<-c("1000eme petite valeur")
+        coltmp<-c("red")
+        ltytmp<-5                                            
+       col<-c(col,coltmp)
+       lty<-c(lty,ltytmp)
+
+
+	}
+
 	if(minMax){
-		colp<-c("red","green","orange","blue")
-		legendp<-c(legendp,"1000eme petite valeur", "100eme petite valeur", "10eme petite valeur", "valeur min")	
+		colp<-c("green","orange","blue")
+		legendp<-c(legendp, "100eme petite valeur", "10eme petite valeur", "valeur min")	
 	}else{
-		colp<-c("red","green")
-		legendp<-c(legendp,"1000eme petite valeur", "100eme petite valeur")	
+		colp<-c("green")
+		legendp<-c(legendp,"100eme petite valeur")	
 	}
     legend<-c(legend,legendp)
     col<-c(col,colp)
