@@ -1,4 +1,4 @@
-graphlevelExpress<-function(expres,filename=".",title="",col=c(1),seuil=0){
+graphlevelExpress<-function(expres,filename=".",title="",col=c(1),seuil=0,pch=c(19)){
 
 	expres<-as.matrix(expres)	
 	rangeExpre<-range(expres)
@@ -13,7 +13,8 @@ graphlevelExpress<-function(expres,filename=".",title="",col=c(1),seuil=0){
 	plot(x,rangeExpre,type="n",xaxt="n",xlab="n",ylab="intensity",cex.lab=1.5,cex.axis=1.5,main=title)
 	for(i in 1:nrow(expres)){
 
-			lines(unlist(expres[i,]),col=col,main=title,type="o",pch=19)
+			lines(unlist(expres[i,]),col=1,main=title,type="l")
+			points(unlist(expres[i,]),col=col,main=title,pch=pch)
 
 	}
 abline(h=seuil,col="red")

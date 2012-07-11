@@ -9,7 +9,7 @@ extendEnd<-function(end,sensGraph){
 		nend<-min(which(sensGraph[end] != sensGraph[indiceDescente:length(sensGraph)]))	
 		nend<-length(sensGraph[1:end]) +nend
 		tmpend<- nend + 50
-		test<-sum(sensGraph[nend:tmpbegin]) < -10
+		test<-sum(sensGraph[nend:tmpend]) < -10
 		end<-nend+1
 		}	
 

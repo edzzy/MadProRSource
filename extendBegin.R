@@ -14,7 +14,7 @@ extendBegin<-function(begin,sensGraph){
 			begin<-nbegin-1
 		}
 		message<-paste(test," ",begin,sep="")
-		print(message)
+#		print(message)
 	}
 	nbegin<-nbegin+1
 	return(nbegin)
