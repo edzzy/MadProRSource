@@ -48,15 +48,15 @@ function(nom_fichier,data,pngDir,profil.median="NA",graph=1,projet=stop("nom de 
   	diagonal=c(min(profilOrdonne,na.rm=T), max(profilOrdonne,na.rm=T))
   	
   	# Graphs avant normalisation pour tous les echantillons
-  	dev.set(dev.next())
+  #	dev.set(dev.next())
   	graph=sapply(increm, traceGraph, matOrdonne, profilOrdonne, diagonal, lowessCurve,nomEchan,"1-Avant", pngDir)
 		
   	# Graphs apres normalisation pour tous les echantillons
-  	dev.set(dev.next())
+  #	dev.set(dev.next())
   	graph=sapply(increm, traceGraph, matNorm, profilMedNorm, diagonal, NULL,nomEchan,"2-Apres", pngDir)
 	
   	#Graph valeurs brutes/valeurs normalisees
-  	dev.set(dev.next())
+  #	dev.set(dev.next())
   	graph=sapply(increm, traceAvantApres, matOrdonne, matNorm, nomEchan, pngDir)
 	} ## If graph
 	##############################
