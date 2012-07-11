@@ -1,6 +1,11 @@
 `graphMmobile` <-
-function(filename,value,seuil=NULL,pas=200,title=""){
+function(filename,value,seuil=NULL,pas="",title=""){
 
+	if(pas==""){
+		pas <- length(value)*0.7/100
+		pas<-round(pas,0)
+		print(pas)
+	}
 	curveMobile<-rep(1/pas,pas)
 	fil<-filter(value,curveMobile)
 	png(filename=filename,width = 1300, height = 900, bg = "white", res = NA )
