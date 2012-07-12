@@ -658,16 +658,17 @@ if(savingData == TRUE){
 print("test stat")
 finalPV <- NULL
 finalFC <- NULL
-sStrict <- 0.0001
-sLache <- 0.001
+seuilPval <- 0.05
 path<-paste(projet,"-05-student",sep="")
 
 if(Annotation && !is.null(infoGeneAnot$GeneName)){
 	pathAnot<-paste(projet,"-06-annotation",sep="")
 	filePuce<-paste(pathAnot,"/",projet,"-puce.txt",sep="")
-	write.table(infoGeneAnot$GeneName,filePuce,sep="\t",quote=FALSE,row.names=FALSE,col.names=FALSE)
+	puce<-infoGeneAnot[rownames(m.filtered),]$GeneName
+	write.table(puce,filePuce,sep="\t",quote=FALSE,row.names=FALSE,col.names=FALSE)
 	
 }
+
 if(ratio!="FALSE" & bicoul == FALSE){
   
   pvalue<-testLogRatio(mat=m.filtered,projet=projet,path=path)
@@ -682,25 +683,15 @@ if(ratio!="FALSE" & bicoul == FALSE){
 		  comparaison<-combn(levels(as.factor(unlist(frameFac[filterParam,]))),2,simplify=TRUE)
 	  }
   }
-  finalPV <- NULL
-  finalFC <- NULL
-  sStrict <- 0.0001
-  sLache <- 0.001
   #-calcul des Test STAT
   cat("\n**Gene Différentiel***\n\n", file=logNames,append=TRUE)
-  cat("Versus\tpval < ",sLache,"\tFDR ",sLache,"\tpval < ",sStrict,"\tFDR ",sStrict,"\tup","\tdown","\n", file=logNames,append=TRUE,sep="")
+  cat("Versus\tpval corrigé < ",seuilPval,"\tup","\tdown","\n", file=logNames,append=TRUE,sep="")
   path<-paste(projet,"-05-student",sep="")
-  tabGenDiff<-matrix(data=NA,ncol=9)
-		    nbLache<-paste("NB pval < ",sLache,sep="")
-		    FDRLache<-paste("FDR ",sLache,sep="")
-		    nbStrict<-paste("NB pval < ",sStrict,sep="")
-		    FDRStrict<-paste("FDR ",sStrict,sep="")
-  			upLL<-paste("Up ",sLache,sep="")
-  			downLL<-paste("Down ",sLache,sep="")
-  			upSS<-paste("Up ",sStrict,sep="")
-  			downSS<-paste("Down ",sStrict,sep="")
-		    colnames(tabGenDiff)<-c("versus",nbLache,FDRLache,nbStrict,FDRStrict,upLL,downLL,upSS,downSS)
+  tabGenDiff<-matrix(data=NA,ncol=4)
+		    nb<-paste("NB pval < ",seuilPval,sep="")
+		    colnames(tabGenDiff)<-c("versus",nb,"Up","Down")
 		    fileTexCluster<-NULL
+nbListGene = 0 # nombre de liste de gene diff à annoter
   for(i in 1:ncol(comparaison)){
 	  #- test stat
   		
@@ -708,7 +699,9 @@ if(ratio!="FALSE" & bicoul == FALSE){
 	  	pathDir<-paste(path,"/Comparaison-",versus,sep="")
 	  	if(!file.exists(pathDir))
 	  		dir.create(pathDir)
-	  	result_pval <-pairRows.t.test(comparaison[,i],m.filtered,frameFac,padj.method="none",path=path,graph=TRUE,projet=projet)
+
+	  	result_pval <-pairRows.t.test(comparaison[,i],m.filtered,frameFac,padj.method="BH",path=path,graph=TRUE,projet=projet)
+
 	  	fileMatrix <-paste(projet,"-04-filtre/",projet,"-matrix-filtreeMatrix.png",sep="")
 	
 	  	fileTree <- paste(projet,"-04-filtre/atr.",projet,"-matrix-filtreeArrayNoName.png ",sep="")
@@ -734,20 +727,14 @@ if(ratio!="FALSE" & bicoul == FALSE){
 	  finalPV<-cbind(finalPV,result_pval)
 	  colnames(finalPV)[i]<- versus
 	  # selection des genes differentiels			
-	  pStrict<- subset(result_pval,result_pval <= sStrict)
-	  fdrStrict<-(sStrict*nrow(m.filtered))/length(pStrict)
-	  if(fdrStrict !="Inf")
-	  fdrStrict<-round(fdrStrict,3)
+
+	  pvalSelect<- subset(result_pval,result_pval <= seuilPval)
 	  
-	  pLache <- subset(result_pval,result_pval <= sLache)
-	  fdrLache<-(sLache*nrow(m.filtered))/length(pLache)
-	  if(fdrLache !="Inf")
-	  	fdrLache<-round(fdrLache,3)
 	  
-	  cat(versus,length(pLache),fdrLache,length(pStrict),fdrStrict,sep="\t",file=logNames,append=TRUE)
-	  r<-c(versus,length(pLache),fdrLache,length(pStrict),fdrStrict)	
-	  write.table(pLache,file=paste(pathDir,"/",projet,"-",versus,"-",sLache,".txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
-	  write.table(pStrict,file=paste(pathDir,"/",projet,"-",versus,"-",sStrict,".txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
+	  cat(versus,length(pvalSelect),sep="\t",file=logNames,append=TRUE)
+	  r<-c(versus,length(pvalSelect))	
+	  if(!is.null(pvalSelect))
+		write.table(pvalSelect,file=paste(pathDir,"/",projet,"-",versus,"-",seuilPval,".txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
 
 	  #-Fold Change 
 	  m1<-meanByFact(m.filtered,frameFac,comparaison[1,i])
@@ -760,26 +747,20 @@ if(ratio!="FALSE" & bicoul == FALSE){
 
 	  #- gene up ou down
 	  syntheseStat<-cbind(result_pval,fc)
-	  upLache<-syntheseStat[which(result_pval<= sLache &  fc >= 0),]
-	  downLache<-syntheseStat[which(result_pval<= sLache & fc < 0),]
-	  nupL<-nrow(upLache)
-	  if(is.null(nupL))
-		  nupL<-0
-	  ndownL<-nrow(downLache)
-	  if(is.null(ndownL))
-		  ndownL<-0
+	  up<-syntheseStat[which(result_pval<= seuilPval & fc >= 0),]
+	  down<-syntheseStat[which(result_pval<= seuilPval & fc < 0),]
+	  nup<-nrow(up)
+	  if(is.null(nup))
+		  nup<-0
+	  ndown<-nrow(down)
+	  if(is.null(ndown))
+		  ndown<-0
 
-	  upStrict<-syntheseStat[which(result_pval<= sStrict &  fc >= 0),]
-	  downStrict<-syntheseStat[which(result_pval<= sStrict & fc < 0),]
-	  nupS<-nrow(upStrict)
-	  if(is.null(nupS))
-		  nupS<-0
-	  ndownS<-nrow(downStrict)
-	  if(is.null(ndownS))
-		  ndownS<-0
-	  
-	  cat("",nupL,ndownL,nupS,ndownS,"\n",sep="\t",file=logNames,append=TRUE)
-	  r<-c(r,nupL,ndownL, nupS,ndownS)
+	 print(nup)
+	 print(ndown) 
+
+	  cat("",nup,ndown,"\n",sep="\t",file=logNames,append=TRUE)
+	  r<-c(r,nup,ndown)
 	  cat(length(r), "\n")
 	  if(is.na(tabGenDiff[1,1])){
 	  	tabGenDiff[1,]<-r
@@ -790,23 +771,33 @@ if(ratio!="FALSE" & bicoul == FALSE){
 	  colnames(syntheseStat)[1]<-paste("Pvalue-",versus,sep="")
 	  colnames(syntheseStat)[2]<-paste("FoldChange-",versus,sep="")
 	  #-fichier de synthese
-	  write.table(upLache,file=paste(pathDir,"/",projet,"-",versus,"-up.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
-	  write.table(downLache,file=paste(pathDir,"/",projet,"-",versus,"-down.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
+	  if(nup != 0)
+		write.table(up,file=paste(pathDir,"/",projet,"-",versus,"-up.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
+	 if(ndown !=0)
+		write.table(down,file=paste(pathDir,"/",projet,"-",versus,"-down.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
 
 	#Fichiers pour l'annotation de toutes les listes
 	if(Annotation && !is.null(infoGeneAnot$GeneName)){
 
-		fileList<-paste(pathAnot,"/",projet,"-listeFile.txt",sep="")
-		upAnotFile<-paste(pathAnot,"/",projet,"-",versus,"-upAnot.txt",sep="")
-		downAnotFile<-paste(pathAnot,"/",projet,"-",versus,"-downAnot.txt",sep="")
-		cat(upAnotFile,"\n",downAnotFile,"\n",file=fileList,append=TRUE,sep="")
 		GeneName<-infoGeneAnot$GeneName
 		names(GeneName)<-rownames(infoGeneAnot)
-		upAnot<-GeneName[rownames(upLache)]
-		downAnot<-GeneName[rownames(downLache)]
-		write.table(upAnot,file=upAnotFile,row.names=FALSE,col.names=FALSE,quote=FALSE,sep="\t")
-		write.table(downAnot,file=downAnotFile,row.names=FALSE,col.names=FALSE,quote=FALSE,sep="\t")
+		fileList<-paste(pathAnot,"/",projet,"-listeFile.txt",sep="")
 
+		if(nup != 0){
+			upAnotFile<-paste(pathAnot,"/",projet,"-",versus,"-upAnot.txt",sep="")
+			cat(upAnotFile,"\n",file=fileList,append=TRUE,sep="")
+			nbListGene<- nbListGene + 1
+			upAnot<-GeneName[rownames(up)]
+			write.table(upAnot,file=upAnotFile,row.names=FALSE,col.names=FALSE,quote=FALSE,sep="\t")
+
+		}
+		if(nup != 0){
+			downAnotFile<-paste(pathAnot,"/",projet,"-",versus,"-downAnot.txt",sep="")
+			cat(downAnotFile,"\n",file=fileList,append=TRUE,sep="")
+			nbListGene<- nbListGene + 1
+			downAnot<-GeneName[rownames(down)]
+			write.table(downAnot,file=downAnotFile,row.names=FALSE,col.names=FALSE,quote=FALSE,sep="\t")
+		}		
 
 	}
 
@@ -817,12 +808,13 @@ if(ratio!="FALSE" & bicoul == FALSE){
 #	tex_question(fileTexCluster,paste("rapport/graphCluster.tex",sep=""))
   write.table(finalPV,file=paste(path,"/",projet,"-allpval.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
   write.table(finalFC,file=paste(path,"/",projet,"-allFC.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
-  tex_genDiff(tabGenDiff)
-	if(Annotation){
+  #tex_genDiff(tabGenDiff)
+	if(Annotation && nbListGene != 0){
 		resultDir<-paste(pathAnot,"/resultat",sep="")
 		commandAnnotation<-paste("gominer -p ",filePuce," -f ",fileList, " -s ", species, " -r ", resultDir,sep="")
 		system(commandAnnotation)
 		filesGominer<-dir(path=resultDir, pattern="^S_*")
+		print(filesGominer)
 		for (i in 1:length(filesGominer)){
 			fileNamesGominer<-"rapport/annotGeneDiff.tex"
 			tmpFiles<-paste(resultDir,"/",filesGominer[i],sep="")
@@ -830,7 +822,9 @@ if(ratio!="FALSE" & bicoul == FALSE){
 		}
 
 		
-	}
+	}else{
+		print("Aucun gene diff pour aucune question")
+		}
 	info<-toLatex(sessionInfo(),local=FALSE)
 	write(info,"rapport/info.tex")
 	print("FIN")
