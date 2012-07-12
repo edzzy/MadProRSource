@@ -66,9 +66,8 @@ function(nom_fichier,data,pngDir,profil.median="NA",graph=1,projet=stop("nom de 
 	colnames(matNorm) = nomEchan
 	matNorm<-round(matNorm,2)
 	
-	nomFile = paste(pngDir,projet,"-",nom_fichier, "-normalisation.txt", sep="")
-	write.table(matNorm,nomFile,sep="\t",row.names=TRUE, col.names=NA)
-	print("Fonction LOEWESS!!")
+#	nomFile = paste(pngDir,projet,"-",nom_fichier, "-normalisation.txt", sep="")
+#	write.table(matNorm,nomFile,sep="\t",row.names=TRUE, col.names=NA)
   return (matNorm)
 }
 

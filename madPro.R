@@ -382,6 +382,8 @@ if(!is.null(echBadCor)){
 print("Normalisation")
 fd<-paste(projet,"-02-normalisation/",sep="")
 dataN<-LOWESS(nom_fichier=nom_fichier,data=dataMA,pngDir=fd,profil.median="NA",graph=1,projet=projet)
+nomFile = paste(fd,projet,"-",nom_fichier, "-normalisation.txt", sep="")
+write.table(dataN,nomFile,sep="\t",row.names=TRUE, col.names=NA,quote=FALSE)
 
 if(geneAnnot == TRUE){
 	fileName<- paste(fd,"/",projet,"-",nom_fichier,"-normalisationInfo.txt",sep="")
@@ -497,15 +499,15 @@ if (clusteringALEA == TRUE){
 	sampMatrix<-sampMatrix[,nA]
 	sampMatrix<-sampMatrix[nG,]
 #####################Utilisation de matrix2png pour le clustering de la matrice aleatoire
-	facteurName<-paste(projet,"-03-clusterAleatoire/",projet,"-facteur.txt",sep="")
-	write.table(frameFac,facteurName,sep="\t",row.names=FALSE,quote=FALSE);
+#	facteurName<-paste(projet,"-03-clusterAleatoire/",projet,"-facteur.txt",sep="")
+#	write.table(frameFac,facteurName,sep="\t",row.names=FALSE,quote=FALSE);
 	
 	mapName<-paste(projet,"-color.txt",sep="")
 	#mapFac<-createMap4matrix2png(frameFac)
 	#write.table(mapFac,mapName,sep="\t",row.names=FALSE,quote=FALSE);
 	frameFac<-as.data.frame(frameFac)[,nA]
 	frameFacN<-frameFac
-	ffm2p<-createMatrix2png(frameFac)
+#	ffm2p<-createMatrix2png(frameFac)
 	frameNames<-paste(projet,"-03-clusterAleatoire/",projet,"-frameFac.txt",sep="")
 	write.table(frameFac,frameNames,sep="\t",row.names=FALSE,quote=FALSE);
 	outfileColor<-paste(projet,"-03-clusterAleatoire/",projet,"-colorSample.png",sep="")
@@ -515,7 +517,6 @@ if (clusteringALEA == TRUE){
 	
 
 ##############################################
-
 
 
 
@@ -651,7 +652,7 @@ if(geneAnnot == TRUE){
 }
 
 if(savingData == TRUE){
-	save(projet,filterParam,ffm2p,m.filtered,frameFac,file=paste(projet,"-dataFilter.Rdata",sep=""))
+	save(projet,filterParam,m.filtered,frameFac,file=paste(projet,"-dataFilter.Rdata",sep=""))
 }
 ##########test stat
 print("test stat")
