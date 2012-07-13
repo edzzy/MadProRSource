@@ -55,6 +55,7 @@ function (data,output_name,minMax=TRUE){
 	lines(v100, col="blue")
 
 
+    lty<- rep(1,4)
 	if(exists("v1000")){
 		lines(v1000, col="green")
 		legendtmp<-c("1000 plus grande valeur")
@@ -66,7 +67,6 @@ function (data,output_name,minMax=TRUE){
     	lty<-c(lty,ltytmp)
 
 	}
-    lty<- rep(1,4)
     if(exists("v10000")){
     	lines(v10000, col="orange")
     	legendtmp<-c("10000 plus grande valeur")
