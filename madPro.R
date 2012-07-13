@@ -705,7 +705,7 @@ nbListGene = 0 # nombre de liste de gene diff à annoter
 	  	if(!file.exists(pathDir))
 	  		dir.create(pathDir)
 
-	  	result_pval <-pairRows.t.test(comparaison[,i],m.filtered,frameFac,padj.method="none",path=path,graph=TRUE,projet=projet)
+	  	result_pval <-pairRows.t.test(comparaison[,i],m.filtered,frameFac,padj.method="BH",path=path,graph=TRUE,projet=projet)
 
 	  	fileMatrix <-paste(projet,"-04-filtre/",projet,"-matrix-filtreeMatrix.png",sep="")
 	
