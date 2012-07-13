@@ -624,6 +624,11 @@ nG<-as.character(nG)
   }
  m.filtered<-m.filtered[nG,]
  frameFacF<-frameFac
+infocdt<-infoGeneAnot[as.character(matcdt[,2]),]
+newcdt<-cbind(matcdt$GID,infocdt,matcdt[,3:ncol(matcdt)])
+colnames(newcdt)[1]<-"GID"
+write.table(newcdt,filterNamecdt,sep="\t",row.names=FALSE,quote=FALSE)
+ rm(newcdt)
  rm(matcdt)
 
 ########Utilisation de matrix2png pour visualation des parametres
@@ -700,7 +705,7 @@ nbListGene = 0 # nombre de liste de gene diff à annoter
 	  	if(!file.exists(pathDir))
 	  		dir.create(pathDir)
 
-	  	result_pval <-pairRows.t.test(comparaison[,i],m.filtered,frameFac,padj.method="BH",path=path,graph=TRUE,projet=projet)
+	  	result_pval <-pairRows.t.test(comparaison[,i],m.filtered,frameFac,padj.method="none",path=path,graph=TRUE,projet=projet)
 
 	  	fileMatrix <-paste(projet,"-04-filtre/",projet,"-matrix-filtreeMatrix.png",sep="")
 	
@@ -784,7 +789,7 @@ nbListGene = 0 # nombre de liste de gene diff à annoter
 		fileList<-paste(pathAnot,"/",projet,"-listeFile.txt",sep="")
 
 		if(nup != 0){
-			upAnotFile<-paste(pathAnot,"/",projet,"-",versus,"-upAnot.txt",sep="")
+			upAnotFile<-paste(pathAnot,"/",projet,"-",versus,"-UP.txt",sep="")
 			cat(upAnotFile,"\n",file=fileList,append=TRUE,sep="")
 			nbListGene<- nbListGene + 1
 			upAnot<-GeneName[rownames(up)]
@@ -792,7 +797,7 @@ nbListGene = 0 # nombre de liste de gene diff à annoter
 
 		}
 		if(nup != 0){
-			downAnotFile<-paste(pathAnot,"/",projet,"-",versus,"-downAnot.txt",sep="")
+			downAnotFile<-paste(pathAnot,"/",projet,"-",versus,"-DOWN.txt",sep="")
 			cat(downAnotFile,"\n",file=fileList,append=TRUE,sep="")
 			nbListGene<- nbListGene + 1
 			downAnot<-GeneName[rownames(down)]
@@ -818,7 +823,8 @@ nbListGene = 0 # nombre de liste de gene diff à annoter
 		for (i in 1:length(filesGominer)){
 			fileNamesGominer<-"rapport/annotGeneDiff.tex"
 			tmpFiles<-paste(resultDir,"/",filesGominer[i],sep="")
-			tex_tab2tex(tmpFiles,fileNamesGominer,title=filesGominer[i])
+			title<-sub("S_(.*)-(UP|DOWN).*","\\1 : \\2",filesGominer[i])
+			tex_tab2tex(tmpFiles,fileNamesGominer,title=title)
 		}
 
 		

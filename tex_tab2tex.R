@@ -3,6 +3,7 @@ tex_tab2tex<-function(fileGominer,fileName,title,n=10,append=TRUE){
 
 	gf<-read.delim(fileGominer,header=TRUE,sep="\t",row.names=NULL,nrow=n,stringsAsFactors=FALSE)
 	cat("\\subsubsection*{\\small{",title,"}}\n",file=fileName,append=append)	
+	if(nrow(gf) != 0){
 	nH<-ncol(gf)
 	aH<-nH - 1
 	pH<-nH+1	
@@ -17,5 +18,8 @@ tex_tab2tex<-function(fileGominer,fileName,title,n=10,append=TRUE){
 
 	}
 	cat(c("\\end{tabular} \\par \n"),file=fileName, append=TRUE)
-
+	}else{
+		
+	cat("Pas d'annotation fonctionelle \\par",file=fileName,append=append)	
+	}
 }
