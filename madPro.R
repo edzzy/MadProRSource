@@ -381,7 +381,7 @@ if(!is.null(echBadCor)){
 ####################################
 print("Normalisation")
 fd<-paste(projet,"-02-normalisation/",sep="")
-dataN<-LOWESS(nom_fichier=nom_fichier,data=dataMA,pngDir=fd,profil.median="NA",graph=1,projet=projet)
+print(system.time(dataN<-LOWESS(nom_fichier=nom_fichier,data=dataMA,pngDir=fd,profil.median="NA",graph=1,projet=projet)))
 nomFile = paste(fd,projet,"-",nom_fichier, "-normalisation.txt", sep="")
 write.table(dataN,nomFile,sep="\t",row.names=TRUE, col.names=NA,quote=FALSE)
 
@@ -396,8 +396,9 @@ if(geneAnnot == TRUE){
 fd<-paste(fd,"images/",sep="")
 imgNames<-paste(fd,projet,"-norImg.png",sep="")
 #images comprenant tous les plot de normalisation 4 échantillons par image (avant apres avant/apres)
-montage_cmd<-paste("montage ",fd,"*.png -tile 3x4 -geometry 100% -background none ", imgNames,sep="")
-system(montage_cmd)
+print("montage image")
+montage_cmd<-paste(" montage ",fd,"*.png -tile 3x4 -geometry 100% -background none ", imgNames,sep="")
+print(system.time(try(system(montage_cmd))))
 imgMont<-dir(path=fd,pattern="*-norImg*")
 filesNorm<-paste(fd,imgMont,sep="")
 
@@ -432,7 +433,7 @@ if(!is.null(echBadCorNorm)){
 	cat("OK\n",append=TRUE,file=logNames)
 }
 
-
+print("ecriture rapport preproc")
 ##Génération fichiers TEX stat Descr et corrélation
 tex_importData(typeArray,dye,ratio)
 tex_norm(projet,filesNorm)
@@ -459,31 +460,32 @@ if (clusteringALEA == TRUE){
 	if(testUnit == FALSE){
 	print("debut clustering matrice aleatoire")
 		commandCluster<-paste(" cluster -f ",sampleMName," -l  -cg m -g 1 -e 1  -m c",sep="")
-		system(commandCluster)
+		print(system.time(try(system(commandCluster,intern=TRUE))))
 	print("fin clustering matrice aleatoire")
 	}else{
 		sampMatrix<-read.delim(sampleMName, header=TRUE,sep="\t",row.names=1)
 	}
-	commandSlcviewMatrix<-paste("slcview.pl ",sampleMPrefix,".cdt -xsize 25 -height 1300 -genelabel 0 -gtrresolution 0 -arraylabels 0 -atrresolution 0 -o ",sampleMPrefix,"Matrix.png" ,sep="" )
+	print("image matrice cluster aleatoire")
+	commandSlcviewMatrix<-paste(" slcview.pl ",sampleMPrefix,".cdt -xsize 25 -height 1300 -genelabel 0 -gtrresolution 0 -arraylabels 0 -atrresolution 0 -o ",sampleMPrefix,"Matrix.png" ,sep="" )
 	
-	system(commandSlcviewMatrix)
+	print(system.time(try(system(commandSlcviewMatrix))))
+
 	
-	commandSlcviewArray<-paste("slcview.pl ",sampleMPrefix,".cdt -xsize 25 -height 1300 -genelabel 0 -noimage -o ",sampleMPrefix,"Array.png" ,sep="" )
+	commandSlcviewArray<-paste(" slcview.pl ",sampleMPrefix,".cdt -xsize 25 -height 1300 -genelabel 0 -noimage -o ",sampleMPrefix,"Array.png" ,sep="" )
 	
-	system(commandSlcviewArray)
+	print(system.time(try(system(commandSlcviewArray))))
 	
-	commandSlcviewArray<-paste("slcview.pl ",sampleMPrefix,".cdt -xsize 25 -height 1300 -genelabel 0 -arraylabel 0 -noimage -o ",sampleMPrefix,"ArrayNoName.png" ,sep="" )
+	commandSlcviewArray2<-paste(" slcview.pl ",sampleMPrefix,".cdt -xsize 25 -height 1300 -genelabel 0 -arraylabel 0 -noimage -o ",sampleMPrefix,"ArrayNoName.png" ,sep="" )
 	
-	system(commandSlcviewArray)
+	print(system.time(try(system(commandSlcviewArray2))))
 	
-	commandSlcviewArray<-paste("slcview.pl ",sampleMPrefix,".cdt -xsize 25 -height 1300 -genelabel 0 -atrresolution 0 -noimage -o ",sampleMPrefix,"ArrayNoAr.png" ,sep="" )
+	commandSlcviewArray3<-paste(" slcview.pl ",sampleMPrefix,".cdt -xsize 25 -height 1300 -genelabel 0 -atrresolution 0 -noimage -o ",sampleMPrefix,"ArrayNoAr.png" ,sep="" )
 	
-	system(commandSlcviewArray)
+	print(system.time(try(system(commandSlcviewArray3))))
 	
 	
 ################
 ###Filtrage######
-
 	nameCDT<-paste(projet,"-03-clusterAleatoire/",projet,"-",nom_fichier,alea,"sample.cdt",sep="")
 	print("filtrage matrice aleatoire")
 	matSamplecdt<-read.delim(nameCDT,sep="\t")
@@ -589,24 +591,24 @@ write.table(m.filtered,filterName,col.names=NA,row.names=TRUE,sep="\t",quote=FAL
 if(testUnit==FALSE){
 	print("debut clustering matrice totale")
 	commandCluster<-paste(" cluster -f ",filterName," -l  -cg m -g 1 -e 1  -m c",sep="")
-system(commandCluster)
+print(system.time(system(commandCluster)))
 
 print("fin clustering matrice totale")
 }
 	commandSlcviewMatrix<-paste("slcview.pl ",filterMPrefix,".cdt -xsize 25 -height 1300 -genelabel 0 -gtrresolution 0 -arraylabels 0 -atrresolution 0 -o ",filterMPrefix,"Matrix.png" ,sep="" )
 	
-	system(commandSlcviewMatrix)
+		print(system.time(system(commandSlcviewMatrix)))
 	
 	commandSlcviewArray<-paste("slcview.pl ",filterMPrefix,".cdt -xsize 25 -height 1300 -genelabel 0 -noimage -o ",filterMPrefix,"Array.png" ,sep="" )
 	
-	system(commandSlcviewArray)
+		print(system.time(system(commandSlcviewArray)))
 	
 	commandSlcviewArray<-paste("slcview.pl ",filterMPrefix,".cdt -xsize 25 -height 1300 -genelabel 0 -arraylabel 0 -noimage -o ",filterMPrefix,"ArrayNoName.png" ,sep="" )
 	
-	system(commandSlcviewArray)	
+		print(system.time(system(commandSlcviewArray)))	
 	commandSlcviewArray<-paste("slcview.pl ",filterMPrefix,".cdt -xsize 25 -height 1300 -genelabel 0 -atrresolution 0 -noimage -o ",filterMPrefix,"ArrayNoAr.png" ,sep="" )
 	
-	system(commandSlcviewArray)
+		print(system.time(system(commandSlcviewArray)))
 	
 
 
@@ -705,7 +707,7 @@ nbListGene = 0 # nombre de liste de gene diff à annoter
 	  	if(!file.exists(pathDir))
 	  		dir.create(pathDir)
 
-	  	result_pval <-pairRows.t.test(comparaison[,i],m.filtered,frameFac,padj.method="BH",path=path,graph=TRUE,projet=projet)
+	  		print(system.time(result_pval <-pairRows.t.test(comparaison[,i],m.filtered,frameFac,padj.method="BH",path=path,graph=TRUE,projet=projet)))
 
 	  	fileMatrix <-paste(projet,"-04-filtre/",projet,"-matrix-filtreeMatrix.png",sep="")
 	
