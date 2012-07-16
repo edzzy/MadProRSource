@@ -815,7 +815,8 @@ nbListGene = 0 # nombre de liste de gene diff à annoter
 #	tex_question(fileTexCluster,paste("rapport/graphCluster.tex",sep=""))
   write.table(finalPV,file=paste(path,"/",projet,"-allpval.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
   write.table(finalFC,file=paste(path,"/",projet,"-allFC.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
-  #tex_genDiff(tabGenDiff)
+print(tabGenDiff)
+  tex_genDiff(tabGenDiff)
 	if(Annotation && nbListGene != 0){
 		resultDir<-paste(pathAnot,"/resultat",sep="")
 		commandAnnotation<-paste("gominer -p ",filePuce," -f ",fileList, " -s ", species, " -r ", resultDir,sep="")
