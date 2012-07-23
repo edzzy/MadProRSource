@@ -450,7 +450,7 @@ tex_Corre(projet,echBadCor,echBadCorNorm,nom_fichier)
 
 
 if(savingData == TRUE){
-	save(projet,frameFacMA,dataMA,file=paste(projet,"-dataRaw.Rdata",sep=""))
+	save(projet,frameFacMA,dataMA,pData,file=paste(projet,"-dataRaw.Rdata",sep=""))
 }
 ##############################
 #creation d'une matrice reduite
@@ -564,7 +564,7 @@ system(montageTree)
 	system(rotateTree)
 }
 if(savingData == TRUE){
-	save(projet,frameFacN,dataN,sampMatrix,file=paste(projet,"-dataNorm.Rdata",sep=""))
+	save(projet,frameFacN,dataN,sampMatrix,pData,file=paste(projet,"-dataNorm.Rdata",sep=""))
 }
 ####Filtrage matrice totale
 print("filtrage matrice totale")
@@ -667,7 +667,7 @@ if(geneAnnot == TRUE){
 }
 
 if(savingData == TRUE){
-	save(projet,filterParam,m.filtered,frameFac,file=paste(projet,"-dataFilter.Rdata",sep=""))
+	save(projet,filterParam,m.filtered,frameFac,pData,file=paste(projet,"-dataFilter.Rdata",sep=""))
 }
 ##########test stat
 print("test stat")
