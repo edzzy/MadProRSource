@@ -290,8 +290,8 @@ if(typeArray == "GPR"){
   
   files<- dir(path=dirFile,pattern=".*\\.gpr$")
  
-  if (all(files != namesFiles))
-    	stop("Non correspondance entre les noms du fichiers d'annotation et les noms reels")
+ # if (all(files != namesFiles))
+  #  	stop("Non correspondance entre les noms du fichiers d'annotation et les noms reels")
 	files<-paste(dirFile,files,sep="/")
 	dataMA<-read_GPR(files,namesArray)
 	
