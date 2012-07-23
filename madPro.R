@@ -254,18 +254,21 @@ if(!file.exists(fileEch))
   stop("Le Fichier ",fileEch," est introuvable")
 ###Annotation des echantillons########  
 print ("début annotation des echantillons")
-frameSample<-read.delim(fileEch)
-namesArray<-createNamesArray(frameSample,type=typeArray,dye=dye,ratio)
-frameFac<-createFactor4matrix2png(frameSample,namesArray,dye=dye,ratio)
+#frameSample<-read.delim(fileEch)
+#frameFac<-createFactor4matrix2png(frameSample,namesArray,dye=dye,ratio)
+pData<-read.delim(fileEch,header=TRUE, row.names=1,sep="\t")
+namesArray<-createNamesArray(pData)
+frameFac<-t(pData)[-1:-2,]
+#namesArray<-rownames(pData);
 if(is.null(dim(frameFac))){
 	frameFac<-as.data.frame(frameFac)
 }
 frameFacMA<-frameFac
 print ("fin annotation des echantillons")
- ##############################################
+##############################################
 
 
-namesFiles<-frameSample$nomFichiers
+namesFiles<-pData$NomFichiers
 
 if(fileGene != ""){
   test<- dir(pattern=fileGene)
@@ -286,7 +289,6 @@ create_pathway(projet)
 if(typeArray == "GPR"){
   
   files<- dir(path=dirFile,pattern=".*\\.gpr$")
-  #on change de repertoire
  
   if (all(files != namesFiles))
     	stop("Non correspondance entre les noms du fichiers d'annotation et les noms reels")
