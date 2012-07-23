@@ -479,15 +479,15 @@ if (clusteringALEA == TRUE){
 	print(system.time(try(system(commandSlcviewMatrix))))
 
 	
-	commandSlcviewArray<-paste(" slcview.pl ",sampleMPrefix,".cdt -xsize 25 -height 1300 -genelabel 0 -noimage -o ",sampleMPrefix,"Array.png" ,sep="" )
+	commandSlcviewArray<-paste(" slcview.pl ",sampleMPrefix,".cdt -xsize 25 -height 1 -gtrresolution 0 -genelabel 0 -noimage -o ",sampleMPrefix,"Array.png" ,sep="" )
 	
 	print(system.time(try(system(commandSlcviewArray))))
 	
-	commandSlcviewArray2<-paste(" slcview.pl ",sampleMPrefix,".cdt -xsize 25 -height 1300 -genelabel 0 -arraylabel 0 -noimage -o ",sampleMPrefix,"ArrayNoName.png" ,sep="" )
+	commandSlcviewArray2<-paste(" slcview.pl ",sampleMPrefix,".cdt -xsize 25 -height 1 -gtrresolution 0 -genelabel 0 -arraylabel 0 -noimage -o ",sampleMPrefix,"ArrayNoName.png" ,sep="" )
 	
 	print(system.time(try(system(commandSlcviewArray2))))
 	
-	commandSlcviewArray3<-paste(" slcview.pl ",sampleMPrefix,".cdt -xsize 25 -height 1300 -genelabel 0 -atrresolution 0 -noimage -o ",sampleMPrefix,"ArrayNoAr.png" ,sep="" )
+	commandSlcviewArray3<-paste(" slcview.pl ",sampleMPrefix,".cdt -xsize 25 -height 1 -gtrresolution 0 -genelabel 0 -atrresolution 0 -noimage -o ",sampleMPrefix,"ArrayNoAr.png" ,sep="" )
 	
 	print(system.time(try(system(commandSlcviewArray3))))
 	
@@ -607,14 +607,14 @@ print("fin clustering matrice totale")
 	
 		print(system.time(system(commandSlcviewMatrix)))
 	
-	commandSlcviewArray<-paste("slcview.pl ",filterMPrefix,".cdt -xsize 25 -height 1300 -genelabel 0 -noimage -o ",filterMPrefix,"Array.png" ,sep="" )
+	commandSlcviewArray<-paste("slcview.pl ",filterMPrefix,".cdt -xsize 25 -height 1 -gtrresolution 0 -genelabel 0 -noimage -o ",filterMPrefix,"Array.png" ,sep="" )
 	
 		print(system.time(system(commandSlcviewArray)))
 	
-	commandSlcviewArray<-paste("slcview.pl ",filterMPrefix,".cdt -xsize 25 -height 1300 -genelabel 0 -arraylabel 0 -noimage -o ",filterMPrefix,"ArrayNoName.png" ,sep="" )
+	commandSlcviewArray<-paste("slcview.pl ",filterMPrefix,".cdt -xsize 25 -height 1 -gtrresolution 0 -genelabel 0 -arraylabel 0 -noimage -o ",filterMPrefix,"ArrayNoName.png" ,sep="" )
 	
 		print(system.time(system(commandSlcviewArray)))	
-	commandSlcviewArray<-paste("slcview.pl ",filterMPrefix,".cdt -xsize 25 -height 1300 -genelabel 0 -atrresolution 0 -noimage -o ",filterMPrefix,"ArrayNoAr.png" ,sep="" )
+	commandSlcviewArray<-paste("slcview.pl ",filterMPrefix,".cdt -xsize 25 -height 1 -gtrresolution 0 -genelabel 0 -atrresolution 0 -noimage -o ",filterMPrefix,"ArrayNoAr.png" ,sep="" )
 	
 		print(system.time(system(commandSlcviewArray)))
 	
