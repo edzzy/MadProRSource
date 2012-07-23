@@ -23,6 +23,7 @@ cat("\n",date(),"\n",file="error.log",append=TRUE)
 
 if(!is.null(pSetup$Projet)){
 	projet<-as.character(pSetup$Projet)
+	projet<-paste(projet,format(Sys.time(),"%y%m%d"),sep="-")
 }else{
 	CheckError=TRUE
 	cat("Le nom du projet est manquant dans le fichier : ", pSetupFile,"\n",file="error.log",append=TRUE)
@@ -245,6 +246,10 @@ logNames<-paste(projet,".log",sep="")
 cat("\n",date(),file=logNames,append=TRUE)
 cat("\nProjet : ",projet,append=TRUE)
 cat("\nSetup  OK",append=TRUE)
+rapportName<-paste(projet,"-rapport.tex",sep="")
+command<-paste("mv rapport/rapport.tex rapport/",rapportName,sep="")
+
+system(command)
 if(!file.exists(fileEch))
   stop("Le Fichier ",fileEch," est introuvable")
 ###Annotation des echantillons########  
@@ -361,11 +366,12 @@ create_boxplot(dataMA,output_name)
 
 ##Statistiques descriptives
 print("Statistiques descriptives")
-output_name = paste(fd,projet,"-",nom_fichier,"-raw-stat-des.jpeg",sep="")
-create_stats_des(dataMA,output_name)
 
 output_name = paste(fd,projet,"-",nom_fichier,"-raw-statClient.jpeg",sep="")
 create_stats_des(dataMA,output_name,minMax=FALSE)
+
+output_name = paste(fd,projet,"-",nom_fichier,"-raw-stat-des.jpeg",sep="")
+create_stats_des(dataMA,output_name)
 ##Correlation
 print("Correlation")
 cat("** \nCorrelation avant normalisation\n",append=TRUE,file=logNames)
@@ -504,7 +510,7 @@ if (clusteringALEA == TRUE){
 #	facteurName<-paste(projet,"-03-clusterAleatoire/",projet,"-facteur.txt",sep="")
 #	write.table(frameFac,facteurName,sep="\t",row.names=FALSE,quote=FALSE);
 	
-	mapName<-paste(projet,"-color.txt",sep="")
+	mapName<-paste(substr(projet,1,(nchar(projet) - 7)),"-color.txt",sep="")
 	#mapFac<-createMap4matrix2png(frameFac)
 	#write.table(mapFac,mapName,sep="\t",row.names=FALSE,quote=FALSE);
 	frameFac<-as.data.frame(frameFac)[,nA]

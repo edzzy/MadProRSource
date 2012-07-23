@@ -13,8 +13,13 @@ function (data,output_name,minMax=TRUE){
 #cette fonction ne retourne aucune valeur.
 
     #Je tri les valeurs par colonnes en ordre croissant
+	print(class(data))
+	print(typeof(data))
     dataSortedBySample=apply(data,2,sort)
+	print(class(dataSortedBySample))
+	print(typeof(dataSortedBySample))
     nbgenes = dim(data)[1]
+	print(nbgenes)
     nbech = dim(data)[2]
     bottomarg = nchar(max(colnames(data))) #nombre de ligne pour la marge du bas
     #1er, 10e ... plus grande valeur
