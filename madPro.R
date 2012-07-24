@@ -258,7 +258,7 @@ print ("début annotation des echantillons")
 #frameFac<-createFactor4matrix2png(frameSample,namesArray,dye=dye,ratio)
 pData<-read.delim(fileEch,header=TRUE, row.names=1,sep="\t")
 #namesArray<-createNamesArray(pData)
-frameFac<-t(pData)[-1:-2,]
+frameFac<-rbind(t(pData)[-1:-2,])
 #namesArray<-rownames(pData);
 if(is.null(dim(frameFac))){
 	frameFac<-as.data.frame(frameFac)
