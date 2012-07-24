@@ -301,11 +301,11 @@ if(typeArray == "GPR"){
   files<- dir(path=dirFile,pattern="U.*\\.txt$")
   #on change de repertoire
   
-	if (all(files == namesFiles) == FALSE)
-    	stop("Non correspondance entre les noms du fichiers d'annotation et les noms reels")
+	if (!all(file.exists(paste(dirFile,pData$nomFichiers,sep="/"))))
+   	stop("Fichiers du fichier de config inexistant")
 
-    	files<-paste(dirFile,files,sep="/")
-		dataMA<-read_Agilent(namesArray=namesArray,files=files,namesGenes=namesGenes,dye=dye,type="AG")
+  	files<-paste(dirFile,files,sep="/")
+	 dataMA<-read_Agilent(pData=pData,namesGenes=namesGenes,type="AG",pathDir=dirFile)
 
 	if(geneAnnot == TRUE){
 		fileName<- paste(projet,"-",nom_fichier,"-rawdataCtrlInfo.txt",sep="")

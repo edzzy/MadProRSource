@@ -1,14 +1,12 @@
 `read_Agilent` <-
-function(namesArray,files,type,namesGenes,dye=2){
+function(pData,namesGenes,type="AG",pathDir=""){
 #Description : La fonction renvoie une matrice d'expression en lisant les fichiers
 			# issus de logiciel d'extraction d'image avec dans chaque colonne
 			# le signal median du canal 
-#namesArray : nom des echantillons. data.frame avec deux colonnes : nR et nG
-###files nom des fichiers de sorties des logiciels d'extraction d'image de scanner 
-	#(feature extraction, nimblScan, genepix) vecteur character
+#pData : data frame avec 2 colonnes obligatoire nomFichier Dye
 #type : type de puce, agilent, nimbgene, gpr ou custum : (AG, NG, GPR, CUST) vecteur(variable) character
-#namesGenes : nom des identifiants de gènes vecteur character
-#dye nombre de canal , par défaut 2 (le plus courant)
+#namesGenes : nom des identifiants de g?nes vecteur character
+
 
 #Verification des parametres d'entree :
 
@@ -17,16 +15,13 @@ function(namesArray,files,type,namesGenes,dye=2){
 		stop(" Type de puce manquantes ")
 	if(! type == "AG" & ! type == "NG" & ! type == "GPR")
 		stop("Type de puce non correcte : seul les types AG (agilent) NG (NimbelGene) et GPR (issue de GenePix) sont disponibles")
-	if(missing(files))
-		stop("Noms des fichiers d'expression manquant") 
-	if(missing(namesArray))
-		stop("Le nom pour les echantillons est manquant")
-	if(missing(namesGenes))
+	
+		if(missing(namesGenes))
 		warning("Le nom pour les genes n'est pas donne. 
               Les colonnes GeneID et FeatureNum seront utilisees par defaut")
-	if( ! dye == 1 & ! dye == 2){
-		stop("Le dye doit etre 1 ou 2")
-	}
+  
+	dye<-length(unique(pData$Dye))
+
 	#Setup des arguments pour la creation de la matrice.
 	# type de puce et noms des colones a extraire.
 	other.col<-c()
@@ -55,16 +50,26 @@ function(namesArray,files,type,namesGenes,dye=2){
 	#parametre du nom des echantillons
 	namesEch<-c()
 	if ( dye == 2 && (type == "AG" || type == "GPR" ) ){
-		namesEch<-c(unlist(as.character(namesArray$nR)),unlist(as.character(namesArray$nG)))
+		namesEch<-c(rownames(pData)[which(tolower(pData$Dye) == "cy5")],
+                rownames(pData)[which(tolower(pData$Dye) == "cy3")])
+    
 	}else {
-		namesEch<-unlist(as.character(namesArray))
+		namesEch<-rownames(pData)
 	}
 
 	#Lecture des fichiers pour creer un objet expressionArray. (limma)
-	RG<-read.maimages(files,source=source,columns=cols,other.columns=other.col)
+	RG<-read.maimages(unique(pData$nomFichiers),source=source,columns=cols,other.columns=other.col,path=pathDir)
 
 		if(dye == 2){
-			data<-cbind(RG$R,RG$G)
+      pDataCy5<-pData[which(tolower(pData$Dye)== "cy5"),]
+      pDataCy3<-pData[which(tolower(pData$Dye)== "cy3"),]
+      R<-RG$R
+      G<-RG$G
+      
+      R<-R[,intersect(removeExt(pDataCy5$nomFichiers),colnames(R))]
+      G<-G[,intersect(removeExt(pDataCy3$nomFichiers),colnames(G))]
+
+			data<-cbind(R,G)
 		}else {
 			data<-RG$G
 		}
