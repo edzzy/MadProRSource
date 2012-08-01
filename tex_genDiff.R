@@ -1,6 +1,5 @@
-tex_genDiff<-function(tabGenDiff,projet,nom_fichier){
+tex_genDiff<-function(tabGenDiff,projet,fileName="rapport/genDiff.tex"){
 	
-	fileName="rapport/genDiff.tex"
 	header<-paste(colnames(tabGenDiff)[1:3]," & ", sep="")
 	header<-c(header, colnames(tabGenDiff)[4], " \\\\ \n \\hline\n")
 	

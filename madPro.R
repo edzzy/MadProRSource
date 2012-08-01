@@ -674,6 +674,7 @@ print("test stat")
 finalPV <- NULL
 finalFC <- NULL
 seuilPval <- 0.05
+seuilPvalRaw <- 0.001
 path<-paste(projet,"-05-student",sep="")
 
 if(Annotation && !is.null(infoGeneAnot$GeneName)){
@@ -701,12 +702,22 @@ if(ratio!="FALSE" & bicoul == FALSE){
   #-calcul des Test STAT
   cat("\n**Gene Différentiel***\n\n", file=logNames,append=TRUE)
   cat("Versus\tpval corrigé < ",seuilPval,"\tup","\tdown","\n", file=logNames,append=TRUE,sep="")
+
   path<-paste(projet,"-05-student",sep="")
+
   tabGenDiff<-matrix(data=NA,ncol=4)
-		    nb<-paste("NB pval < ",seuilPval,sep="")
-		    colnames(tabGenDiff)<-c("versus",nb,"Up","Down")
-		    fileTexCluster<-NULL
-nbListGene = 0 # nombre de liste de gene diff à annoter
+  nb<-paste("NB pvalAdjust < ",seuilPval,sep="")
+  colnames(tabGenDiff)<-c("versus",nb,"Up","Down")
+
+
+  tabGenDiffRaw<-matrix(data=NA,ncol=4)
+  nbRaw<-paste("NB pvalRaw < ",seuilPvalRaw,sep="")
+  colnames(tabGenDiffRaw)<-c("versus",nb,"Up","Down")
+
+  fileTexCluster<-NULL
+	nbListGene = 0 # nombre de liste de gene diff à annoter
+
+
   for(i in 1:ncol(comparaison)){
 	  #- test stat
   		
@@ -715,10 +726,14 @@ nbListGene = 0 # nombre de liste de gene diff à annoter
 	  	if(!file.exists(pathDir))
 	  		dir.create(pathDir)
 
-	  		print(system.time(result_pval <-pairRows.t.test(comparaison[,i],m.filtered,frameFac,padj.method="BH",path=path,graph=TRUE,projet=projet)))
+		dataPval<-pairRows.t.test(comparaison[,i],m.filtered,frameFac,padj.method="BH",path=path,graph=TRUE,projet=projet)
+		colnames(dataPval)<-c(paste(versus,"Raw",sep=""),paste(versus,"Adjust",sep=""))
+		result_pvalAdjust<-dataPval[,2] #Pvalue ajustées
+		result_pvalRaw<-dataPval[,1] #Pvalue brutes 
 
+
+		#Montage de l'image pvalue cluster et arbre echantillons
 	  	fileMatrix <-paste(projet,"-04-filtre/",projet,"-matrix-filtreeMatrix.png",sep="")
-	
 	  	fileTree <- paste(projet,"-04-filtre/atr.",projet,"-matrix-filtreeArrayNoName.png ",sep="")
 	  	fileOut<-paste(projet,"-05-student/",projet,"-Cluster-",versus,".png",sep="")
 		fileOut<-gsub("_","-",fileOut)
@@ -739,17 +754,26 @@ nbListGene = 0 # nombre de liste de gene diff à annoter
 	 		fileTexCluster<-c(fileTexCluster,paste(versus,".tex",sep=""))
 	 	}
 	  
-	  finalPV<-cbind(finalPV,result_pval)
-	  colnames(finalPV)[i]<- versus
+
+
+	  finalPV<-cbind(finalPV,dataPval)
 	  # selection des genes differentiels			
 
-	  pvalSelect<- subset(result_pval,result_pval <= seuilPval)
+	  pvalSelect<- subset(result_pvalAdjust,result_pvalAdjust <= seuilPval)
+	  pvalSelectRaw<- subset(result_pvalRaw,result_pvalRaw <= seuilPvalRaw)
 	  
 	  
 	  cat(versus,length(pvalSelect),sep="\t",file=logNames,append=TRUE)
 	  r<-c(versus,length(pvalSelect))	
 	  if(!is.null(pvalSelect))
-		write.table(pvalSelect,file=paste(pathDir,"/",projet,"-",versus,"-",seuilPval,".txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
+		write.table(pvalSelect,file=paste(pathDir,"/",projet,"-",versus,"-",seuilPval,"Adjust.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
+
+	rRaw<-c(versus,length(pvalSelectRaw))	
+
+	  if(!is.null(pvalSelectRaw))
+		write.table(pvalSelectRaw,file=paste(pathDir,"/",projet,"-",versus,"-",seuilPvalRaw,"-Raw.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
+
+
 
 	  #-Fold Change 
 	  m1<-meanByFact(m.filtered,frameFac,comparaison[1,i])
@@ -760,19 +784,16 @@ nbListGene = 0 # nombre de liste de gene diff à annoter
 	  finalFC<-cbind(finalFC,fc)
 	  colnames(finalFC)[i]<-paste("FC-",versus,sep="")
 
-	  #- gene up ou down
-	  syntheseStat<-cbind(result_pval,fc)
-	  up<-syntheseStat[which(result_pval<= seuilPval & fc >= 0),]
-	  down<-syntheseStat[which(result_pval<= seuilPval & fc < 0),]
+	  #- gene up ou down Adjust
+	  syntheseStat<-cbind(result_pvalAdjust,fc)
+	  up<-syntheseStat[which(result_pvalAdjust<= seuilPval & fc >= 0),]
+	  down<-syntheseStat[which(result_pvalAdjust<= seuilPval & fc < 0),]
 	  nup<-nrow(up)
 	  if(is.null(nup))
 		  nup<-0
 	  ndown<-nrow(down)
 	  if(is.null(ndown))
 		  ndown<-0
-
-	 print(nup)
-	 print(ndown) 
 
 	  cat("",nup,ndown,"\n",sep="\t",file=logNames,append=TRUE)
 	  r<-c(r,nup,ndown)
@@ -785,11 +806,40 @@ nbListGene = 0 # nombre de liste de gene diff à annoter
 	  }
 	  colnames(syntheseStat)[1]<-paste("Pvalue-",versus,sep="")
 	  colnames(syntheseStat)[2]<-paste("FoldChange-",versus,sep="")
+
+
+	  #- gene up ou down Adjust
+	  syntheseStatRaw<-cbind(result_pvalRaw,fc)
+	  upRaw<-syntheseStat[which(result_pvalRaw<= seuilPvalRaw & fc >= 0),]
+	  downRaw<-syntheseStat[which(result_pvalRaw<= seuilPvalRaw & fc < 0),]
+	  nupRaw<-nrow(upRaw)
+	  if(is.null(nupRaw))
+		  nupRaw<-0
+	  ndownRaw<-nrow(downRaw)
+	  if(is.null(ndownRaw))
+		  ndownRaw<-0
+
+	  rRaw<-c(rRaw,nupRaw,ndownRaw)
+	  cat(length(rRaw), "\n")
+	  if(is.na(tabGenDiffRaw[1,1])){
+	  	tabGenDiffRaw[1,]<-rRaw
+	  }else{
+	  	#n<-nrow+1
+	  	tabGenDiffRaw<-rbind(rRaw,tabGenDiffRaw,deparse.level=0)
+	  }
+	  colnames(syntheseStatRaw)[1]<-paste("Pvalue-",versus,sep="")
+	  colnames(syntheseStatRaw)[2]<-paste("FoldChange-",versus,sep="")
+
+
+
+
+
 	  #-fichier de synthese
-	  if(nup != 0)
-		write.table(up,file=paste(pathDir,"/",projet,"-",versus,"-up.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
+	 if(nup != 0)
+		write.table(up,file=paste(pathDir,"/",projet,"-",versus,"-upAdjust.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
 	 if(ndown !=0)
-		write.table(down,file=paste(pathDir,"/",projet,"-",versus,"-down.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
+		write.table(down,file=paste(pathDir,"/",projet,"-",versus,"-downAdjust.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
+
 
 	#Fichiers pour l'annotation de toutes les listes
 	if(Annotation && !is.null(infoGeneAnot$GeneName)){
@@ -823,8 +873,9 @@ nbListGene = 0 # nombre de liste de gene diff à annoter
 #	tex_question(fileTexCluster,paste("rapport/graphCluster.tex",sep=""))
   write.table(finalPV,file=paste(path,"/",projet,"-allpval.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
   write.table(finalFC,file=paste(path,"/",projet,"-allFC.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
-print(tabGenDiff)
+	print(tabGenDiff)
   tex_genDiff(tabGenDiff)
+  tex_genDiff(tabGenDiffRaw,fileName="rapport/genDiffRaw.tex")
 	if(Annotation && nbListGene != 0){
 		resultDir<-paste(pathAnot,"/resultat",sep="")
 		commandAnnotation<-paste("gominer -p ",filePuce," -f ",fileList, " -s ", species, " -r ", resultDir,sep="")

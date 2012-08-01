@@ -25,8 +25,9 @@ function(comparaison_vect,mat,f,padj.method="none",pas=200,path=".",graph=TRUE,p
 	tt<-rowFtests(CC,ff,var.equal=FALSE)
 	pval<-tt$p.value
 	names(pval)<-rownames(CC)
-	pval<-p.adjust(pval,method=padj.method)
-
+	pvaladjust<-p.adjust(pval,method=padj.method)
+	pvalData<-cbind(pval,pvaladjust)
+	colnames(pvalData)<-c("PvalRaw","PvaAdjust-BH")
 #	if(!is.null(pval[which(is.na(pval))])){
 #		probeNa<- names(pval[which(is.na(pval))])
 #		pvalNa<-pval[which(is.na(pval))]
@@ -46,6 +47,6 @@ function(comparaison_vect,mat,f,padj.method="none",pas=200,path=".",graph=TRUE,p
 	#	pv<-as.numeric(pval)
 		graphMmobile(filename,pv,pas=pas,title=comparaison_name,seuil=0)
 	}
-  return(pval)
+  return(pvalData)
 }
 
