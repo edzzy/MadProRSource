@@ -11,15 +11,12 @@ function(mat,pngDir){
   	diagonal=c(min(profMed,na.rm=T), max(profMed,na.rm=T))
   	
   	# Graphs avant normalisation pour tous les echantillons
-  	dev.set(dev.next())
   	graph=sapply(increm, traceGraph, mat, profMed, diagonal, NULL ,nomEchan,"1-Avant", pngDir)
 		
   	# Graphs apres normalisation pour tous les echantillons
-  	dev.set(dev.next())
   	graph=sapply(increm, traceGraph, matN, profMedN, diagonal, NULL,nomEchan,"2-Apres", pngDir)
 	
   	#Graph valeurs brutes/valeurs normalisees
-  	dev.set(dev.next())
   	graph=sapply(increm, traceAvantApres, mat, matN, nomEchan, pngDir)
 return(matN)
 }

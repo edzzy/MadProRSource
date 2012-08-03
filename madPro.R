@@ -1,5 +1,5 @@
 `madPro` <-
-function(pSetupFile="pSetup.txt",savingData=TRUE,importData=TRUE,rmCTRL=TRUE,isCompar=FALSE,Normalise=TRUE,statBeforNorm=TRUE,statBeforeNorm=TRUE,clusteringALEA=TRUE,Filtrage=TRUE,Cluster=TRUE,tStat=TRUE,rmArray=FALSE,Annotation=FALSE,testUnit=FALSE){
+function(pSetupFile="pSetup.txt",savingData=TRUE,importData=TRUE,rmCTRL=TRUE,isCompar=FALSE,Normalise="lowess",statBeforNorm=TRUE,statBeforeNorm=TRUE,clusteringALEA=TRUE,Filtrage=TRUE,Cluster=TRUE,tStat=TRUE,rmArray=FALSE,Annotation=FALSE,testUnit=FALSE){
 
 #Package a charger pour l'excussion du script
 require("limma")
@@ -268,7 +268,7 @@ print ("fin annotation des echantillons")
 ##############################################
 
 
-namesFiles<-pData$NomFichiers
+namesFiles<-pData$nomFichiers
 
 if(fileGene != ""){
   test<- dir(pattern=fileGene)
@@ -389,7 +389,11 @@ if(!is.null(echBadCor)){
 ####################################
 print("Normalisation")
 fd<-paste(projet,"-02-normalisation/",sep="")
+if(Normalise == "lowess"){
 print(system.time(dataN<-LOWESS(nom_fichier=nom_fichier,data=dataMA,pngDir=fd,profil.median="NA",graph=1,projet=projet)))
+}else if(Normalise =="quantile"){
+	dataN<-normQuantile(mat=as.matrix(dataMA),pngDir = fd)
+	}
 nomFile = paste(fd,projet,"-",nom_fichier, "-normalisation.txt", sep="")
 write.table(dataN,nomFile,sep="\t",row.names=TRUE, col.names=NA,quote=FALSE)
 
