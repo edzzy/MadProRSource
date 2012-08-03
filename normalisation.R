@@ -1,3 +1,10 @@
+`calculeNorm` <-
+function(increm, echantillon, lowessCurve, ref)
+{
+	result = echantillon[,increm]/lowessCurve[,increm]*ref
+	return(result)
+}
+
 `LOWESS` <-
 function(nom_fichier,data,pngDir,profil.median="NA",graph=1,projet=stop("nom de projet manquant"))
 {
@@ -35,9 +42,6 @@ function(nom_fichier,data,pngDir,profil.median="NA",graph=1,projet=stop("nom de 
 	
 	# Calcul de la matrice normalisee
 	increm=c(1:dim(data)[2])
-#	matNormlog = sapply(increm, calculeNorm, log(matOrdonne), lowessCurve, log(profilOrdonne))
-#	matNorm = sapply(increm, calculeNorm, log(matOrdonne), lowessCurve, log(profilOrdonne))
-#	matNorm=exp(matNormlog) 	
 	matNorm = sapply(increm, calculeNorm, matOrdonne, exp(lowessCurve), profilOrdonne)
 	
 	profilMedNorm = apply(matNorm,1,median,na.rm=TRUE)
@@ -48,15 +52,12 @@ function(nom_fichier,data,pngDir,profil.median="NA",graph=1,projet=stop("nom de 
   	diagonal=c(min(profilOrdonne,na.rm=T), max(profilOrdonne,na.rm=T))
   	
   	# Graphs avant normalisation pour tous les echantillons
-  #	dev.set(dev.next())
   	graph=sapply(increm, traceGraph, matOrdonne, profilOrdonne, diagonal, lowessCurve,nomEchan,"1-Avant", pngDir)
 		
   	# Graphs apres normalisation pour tous les echantillons
-  #	dev.set(dev.next())
   	graph=sapply(increm, traceGraph, matNorm, profilMedNorm, diagonal, NULL,nomEchan,"2-Apres", pngDir)
 	
   	#Graph valeurs brutes/valeurs normalisees
-  #	dev.set(dev.next())
   	graph=sapply(increm, traceAvantApres, matOrdonne, matNorm, nomEchan, pngDir)
 	} ## If graph
 	##############################
@@ -66,8 +67,57 @@ function(nom_fichier,data,pngDir,profil.median="NA",graph=1,projet=stop("nom de 
 	colnames(matNorm) = nomEchan
 	matNorm<-round(matNorm,2)
 	
-#	nomFile = paste(pngDir,projet,"-",nom_fichier, "-normalisation.txt", sep="")
-#	write.table(matNorm,nomFile,sep="\t",row.names=TRUE, col.names=NA)
   return (matNorm)
+}
+
+`my.lowess` <-
+function(matriceW,vecRef,f)
+{
+	index = which(is.na(matriceW))
+	indexVal = which(!is.na(matriceW))
+
+	if (length(index)>1) {
+		print("OT des NAs")
+		print(length(matriceW))
+		vecRef = vecRef[-index]
+		matriceW2 = matriceW[-index]
+
+		result = lowess(vecRef,matriceW2,f=f)
+		temp = result$y
+
+		sortie = rep(NA,length(matriceW))
+		sortie[indexVal]=temp
+		print(length(sortie))
+	}
+
+	else{
+		result = lowess(vecRef,matriceW,f=f)
+		sortie = result$y
+	}
+	sortie
+}
+
+`normQuantile` <-
+function(mat,pngDir,img=TRUE){
+
+	nomEchan = colnames(mat)
+	matN<-normalizeBetweenArrays(as.matrix(mat),method="quantile")
+	profMed<-apply(mat,1,median)
+	profMedN<-apply(matN,1,median)	
+
+	increm=c(1:dim(mat)[2])
+########## Plots ###########################
+  	diagonal=c(min(profMed,na.rm=T), max(profMed,na.rm=T))
+  if(img == TRUE){	
+  	# Graphs avant normalisation pour tous les echantillons
+  	graph=sapply(increm, traceGraph, mat, profMed, diagonal, NULL ,nomEchan,"1-Avant", pngDir)
+		
+  	# Graphs apres normalisation pour tous les echantillons
+  	graph=sapply(increm, traceGraph, matN, profMedN, diagonal, NULL,nomEchan,"2-Apres", pngDir)
+	
+  	#Graph valeurs brutes/valeurs normalisees
+  	graph=sapply(increm, traceAvantApres, mat, matN, nomEchan, pngDir)
+	 }
+return(matN)
 }
 

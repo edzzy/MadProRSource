@@ -1,3 +1,56 @@
+`create_boxplot` <-
+function (data,output_name)
+##fonction pour créer des boites à moustaches
+{
+  bottomarg = nchar(max(colnames(data))) #nombre de ligne pour la marge du bas
+  jpeg(filename = output_name, width = 1300, height = 900, quality = 100, bg = "white", res = NA)
+  par(mar=c(bottomarg + 5,5,3,3))
+  boxplot(log(as.data.frame(data)), col=rainbow(n=20), las="2",cex.lab=1.5,cex.axis=1.5)
+  dev.off()
+}
+
+`create_correlation_median` <-
+function (data,output_name,seuil=0.8)
+##Correlation par rapport au profil median
+{
+  bottomarg = nchar(max(colnames(data))) #nombre de ligne pour la marge du bas
+  prof_med = apply(data,1,median)
+  correl=apply(data,2,cor,prof_med)
+  pcol<-rep(1,ncol(data))
+  badCor<-which(correl<seuil)
+  pcol[badCor]=2
+  jpeg(filename = output_name, width = 1300, height = 900, quality = 100, bg = "white", res = NA)
+  par(mar=c(bottomarg +5,5,3,3))
+  plot(correl, type="l",xlab="", ylab="Correlation par rapport au profil median", ylim=c(0,1),cex.lab=1.5,cex.axis=1.5,xaxt="n")
+  points(correl, col=pcol,xlab="",pch=19,cex=1.5, ylab="Correlation par rapport au profil median", ylim=c(0,1),cex.lab=1.5,cex.axis=1.5,xaxt="n")
+  axis(1,1:dim(data)[2],labels=colnames(data),las="2",cex.axis=1.5)
+  abline(h=seuil,col="red")
+  abline(v=badCor,col="green")	
+  dev.off()
+	return(names(badCor))
+}
+
+`graphMmobile` <-
+function(filename,value,seuil=NULL,pas="",title=""){
+
+	if(pas==""){
+		pas <- length(value)*0.7/100
+		pas<-round(pas,0)
+		print(pas)
+	}
+	curveMobile<-rep(1/pas,pas)
+	fil<-filter(value,curveMobile)
+	png(filename=filename,width = 1300, height = 900, bg = "white", res = NA )
+	par(mar=c(0,0,0,0),oma=c(0,0,0,0),mgp=c(0,0,0))
+	plot(value,pch=19,cex=0.8,cex.lab=1.5,cex.axis=3,col="slateblue",bty="n",xlab="",ylab="",xaxt="n",yaxt="n",xlim=c(1,length(value)),ylim=range(value,na.rm=TRUE),main=title)
+	lines(fil,lwd=5,col="orange2")
+	axis(side=2,tcl=0.5,label=TRUE,pos=c(0,0),cex.axis=3)
+	if (! is.null(seuil)){
+	abline(h=seuil,lwd=2,pch=19,cex=0.8,cex.lab=1.5,cex.axis=1.5,col="red")
+	}
+	dev.off()
+}
+
 `create_stats_des` <-
 function (data,output_name,minMax=TRUE){
 ##Statistiques descriptives
@@ -157,5 +210,52 @@ function (data,output_name,minMax=TRUE){
     
     legend(nbech+1.5,milieu, yjust=1, legend=legend,lwd=1,cex=1.5,col=col,lty=lty)
     dev.off()
+}
+
+graphlevelExpress<-function(expres,filename=".",title="",col=c(1),seuil=0,pch=c(19)){
+
+	expres<-as.matrix(expres)	
+	rangeExpre<-range(expres)
+	min<-rangeExpre[1]
+	max<-rangeExpre[2]
+    x = c(1,ncol(expres)+1) #x pour le plot invisible
+
+    bottomarg = nchar(max(colnames(expres))) #nombre de ligne pour la marge du bas
+
+	jpeg(filename=filename, width = 1300 , height = 900, quality = 100,res=NA, bg= "white")
+    par(mar=c(bottomarg +5,5,10,5))
+	plot(x,rangeExpre,type="n",xaxt="n",xlab="n",ylab="intensity",cex.lab=1.5,cex.axis=1.5,main=title)
+	for(i in 1:nrow(expres)){
+
+			lines(unlist(expres[i,]),col=1,main=title,type="l")
+			points(unlist(expres[i,]),col=col,main=title,pch=pch)
+
+	}
+abline(h=seuil,col="red")
+axis(1,1:ncol(expres),labels=colnames(expres),las="2",cex.axis=1.5)
+dev.off()
+
+}
+`traceAvantApres` <-
+function(increm, matOrdonne, matNorm, nomEchan, pngDir)
+{
+		nom_fichier = paste(pngDir,"images/",nomEchan[increm],"_","3-AvantApres",".png",sep="")
+		png(filename=nom_fichier)
+    plot(matOrdonne[,increm],matNorm[,increm], log='xy', ylab=nomEchan[increm],pch=19,,cex=0.8,cex.lab=1.5,cex.axis=1.5)
+    dev.off()
+}
+
+`traceGraph` <-
+function(increm, matData, ref, diagonal, lowessCurve=NULL,nomEchan,status,pngDir)
+{
+	nom_fichier = paste(pngDir,"images/",nomEchan[increm],"_",status,".png",sep="")
+	png(filename=nom_fichier)
+    plot(ref,matData[,increm],log='xy', ylab=nomEchan[increm],pch=19,cex=0.8,cex.lab=1.5,cex.axis=1.5 )
+    if(!is.null(lowessCurve)){
+        lines(ref,exp(lowessCurve[,increm]),col=2,lwd=2)
+    }
+    lines(diagonal,diagonal,col=3,lwd=2)
+    dev.off()
+
 }
 
