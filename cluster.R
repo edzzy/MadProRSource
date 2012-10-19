@@ -16,7 +16,7 @@ clusterAnalyse<-function(mat,comparaison,f,pvalRaw,info,pathPNG="./",pathAnnot="
 		selectCoord<-NULL
 		#Detection
 		pas=nrow(mat) *0.7/100
-		coord<-detectCluster(pval=pval[,i],pas=pas,seuil=seuil)	
+		coord<-detectCluster(pval=pvalRaw[,i],pas=pas,seuil=seuil)	
 		#Extraction	
 		prefixName<-paste(comparaison[1,i],comparaison[2,i],sep="-VS-")
 
@@ -100,7 +100,7 @@ clusterAnalyse<-function(mat,comparaison,f,pvalRaw,info,pathPNG="./",pathAnnot="
 	m1<-meanByFact(mat,f,comparaison[1,i])
 	m2<-meanByFact(mat,f,comparaison[2,i])
 	logFC<-log2(m1/m2)
-	value<-sign(logFC) * -log10(pval[,i])
+	value<-sign(logFC) * -log10(pvalRaw[,i])
 #	value<-apply(tabmean,1,graphClustPval)
 	if(is.null(coord)){
 		selectCoord<-0	

@@ -487,13 +487,6 @@ if (clusteringALEA == TRUE){
 	
 	print(system.time(try(system(commandSlcviewArray))))
 	
-	commandSlcviewArray2<-paste(" slcview.pl ",sampleMPrefix,".cdt -xsize 25 -height 1 -gtrresolution 0 -genelabel 0 -arraylabel 0 -noimage -o ",sampleMPrefix,"ArrayNoName.png" ,sep="" )
-	
-	print(system.time(try(system(commandSlcviewArray2))))
-	
-	commandSlcviewArray3<-paste(" slcview.pl ",sampleMPrefix,".cdt -xsize 25 -height 1 -gtrresolution 0 -genelabel 0 -atrresolution 0 -noimage -o ",sampleMPrefix,"ArrayNoAr.png" ,sep="" )
-	
-	print(system.time(try(system(commandSlcviewArray3))))
 	
 	
 ################
@@ -513,15 +506,10 @@ if (clusteringALEA == TRUE){
 	sampMatrix<-sampMatrix[,nA]
 	sampMatrix<-sampMatrix[nG,]
 #####################Utilisation de matrix2png pour le clustering de la matrice aleatoire
-#	facteurName<-paste(projet,"-03-clusterAleatoire/",projet,"-facteur.txt",sep="")
-#	write.table(frameFac,facteurName,sep="\t",row.names=FALSE,quote=FALSE);
 	
 	mapName<-paste(substr(projet,1,(nchar(projet) - 7)),"-color.txt",sep="")
-	#mapFac<-createMap4matrix2png(frameFac)
-	#write.table(mapFac,mapName,sep="\t",row.names=FALSE,quote=FALSE);
 	frameFac<-as.data.frame(frameFac)[,nA]
 	frameFacN<-frameFac
-#	ffm2p<-createMatrix2png(frameFac)
 	frameNames<-paste(projet,"-03-clusterAleatoire/",projet,"-frameFac.txt",sep="")
 	write.table(frameFac,frameNames,sep="\t",row.names=FALSE,quote=FALSE);
 	outfileColor<-paste(projet,"-03-clusterAleatoire/",projet,"-colorSample.png",sep="")
@@ -559,7 +547,7 @@ lseuil<-log10(seuil)
 filename=paste(projet,"-03-clusterAleatoire/",projet,"-signalMedian.png",sep="")
 graphMmobile(filename,profmed,lseuil)
 #########################
-montageMont<-paste("madProMontage.pl -b ",outfileColor," -m ",projet,"-03-clusterAleatoire/",sampleMPrefixShort,"Matrix.png -t ",projet,"-03-clusterAleatoire/atr.",sampleMPrefixShort,"ArrayNoName.png -g ",filename," -o ",projet,"-03-clusterAleatoire/",projet,"-filtrageCluster.png",sep="")
+montageMont<-paste("madProMontage.pl -b ",outfileColor," -m ",projet,"-03-clusterAleatoire/",sampleMPrefixShort,"Matrix.png -t ",projet,"-03-clusterAleatoire/atr.",sampleMPrefixShort,"Array.png -g ",filename," -o ",projet,"-03-clusterAleatoire/",projet,"-filtrageCluster.png",sep="")
 system(montageMont)
 montageTree<-paste("montage ",projet,"-03-clusterAleatoire/atr.",sampleMPrefixShort,"Array.png ",outfileColor," -geometry +0+0 -tile 1x ",projet,"-03-clusterAleatoire/",projet,"-TreeArraycolor.png",sep="")
 system(montageTree)
@@ -599,6 +587,9 @@ if(ratio != "FALSE"){
 
 #filterName<-paste(projet,"-04-filtre/",projet,"-matrix_filtree.txt",sep="")
 write.table(m.filtered,filterName,col.names=NA,row.names=TRUE,sep="\t",quote=FALSE)
+
+
+
 ################Clustering de la matrice totale
 if(testUnit==FALSE){
 	print("debut clustering matrice totale")
@@ -615,12 +606,6 @@ print("fin clustering matrice totale")
 	
 		print(system.time(system(commandSlcviewArray)))
 	
-	commandSlcviewArray<-paste("slcview.pl ",filterMPrefix,".cdt -xsize 25 -height 1 -gtrresolution 0 -genelabel 0 -arraylabel 0 -noimage -o ",filterMPrefix,"ArrayNoName.png" ,sep="" )
-	
-		print(system.time(system(commandSlcviewArray)))	
-	commandSlcviewArray<-paste("slcview.pl ",filterMPrefix,".cdt -xsize 25 -height 1 -gtrresolution 0 -genelabel 0 -atrresolution 0 -noimage -o ",filterMPrefix,"ArrayNoAr.png" ,sep="" )
-	
-		print(system.time(system(commandSlcviewArray)))
 	
 
 
@@ -673,14 +658,16 @@ if(geneAnnot == TRUE){
 if(savingData == TRUE){
 	save(projet,filterParam,m.filtered,frameFac,pData,file=paste(projet,"-dataFilter.Rdata",sep=""))
 }
-##########test stat
+
+#####################################################test stat
+
 print("test stat")
 finalPV <- NULL
 finalFC <- NULL
 seuilPval <- 0.05
 seuilPvalRaw <- 0.001
 path<-paste(projet,"-05-student",sep="")
-
+pvalRaw<-data.frame()
 if(Annotation && !is.null(infoGeneAnot$GeneName)){
 	pathAnot<-paste(projet,"-06-annotation",sep="")
 	filePuce<-paste(pathAnot,"/",projet,"-puce.txt",sep="")
@@ -719,7 +706,7 @@ if(ratio!="FALSE" & bicoul == FALSE){
   colnames(tabGenDiffRaw)<-c("versus",nb,"Up","Down")
 
   fileTexCluster<-NULL
-	nbListGene = 0 # nombre de liste de gene diff à annoter
+  nbListGene = 0 # nombre de liste de gene diff à annoter
 
 
   for(i in 1:ncol(comparaison)){
@@ -734,29 +721,19 @@ if(ratio!="FALSE" & bicoul == FALSE){
 		colnames(dataPval)<-c(paste(versus,"Raw",sep=""),paste(versus,"Adjust",sep=""))
 		result_pvalAdjust<-dataPval[,2] #Pvalue ajustées
 		result_pvalRaw<-dataPval[,1] #Pvalue brutes 
+		if(i == 1){
+			pvalRaw<-cbind(result_pvalRaw)
+		}else{
+			pvalRaw<-cbind(pvalRaw,result_pvalRaw)
 
+		}
 
 		#Montage de l'image pvalue cluster et arbre echantillons
-	  	fileMatrix <-paste(projet,"-04-filtre/",projet,"-matrix-filtreeMatrix.png",sep="")
-	  	fileTree <- paste(projet,"-04-filtre/atr.",projet,"-matrix-filtreeArrayNoName.png ",sep="")
-	  	fileOut<-paste(projet,"-05-student/",projet,"-Cluster-",versus,".png",sep="")
-		fileOut<-gsub("_","-",fileOut)
-	  	fileGraph<-paste(projet,"-05-student/",projet,versus,".png",sep="")
-	  	montageMont<-paste("madProMontage.pl -b ",outfileColor," -m ",fileMatrix," -t ",fileTree," -g ",fileGraph," -o ",fileOut,sep="")
-		system(montageMont)
+	  #	fileOut<-paste(projet,"-05-student/",projet,"-Cluster-",versus,".png",sep="")
+	#	fileOut<-gsub("_","-",fileOut)
+	  #	fileGraph<-paste(projet,"-05-student/",projet,versus,".png",sep="")
 
-	 if(i == 1){
-	 	appendFirst = FALSE
-	 }else{
-	 	appendFirst = TRUE
-	 }
 
-	  tex_clusterImage(fileOut, paste("rapport/graphCluster.tex",sep=""),versus,appendFirst,projet)
-	 	if(is.null(fileTexCluster)){
-	 		fileTexCluster<-paste(versus,".tex",sep="")
-	 	}else{
-	 		fileTexCluster<-c(fileTexCluster,paste(versus,".tex",sep=""))
-	 	}
 	  
 
 
@@ -874,8 +851,44 @@ if(ratio!="FALSE" & bicoul == FALSE){
 	  write.table(syntheseStat,file=paste(pathDir,"/",projet,"-",versus,"-allSynth.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
 				
   }
+
+
+#detection des cluster
+pathPNG<-paste(projet,"-05-student",sep="")
+pathAnnot<-paste(projet,"-06-annotation",sep="")
+	print(dim(pvalRaw))	
+		graphFile<-clusterAnalyse(mat=m.filtered,info=infoGeneAnot,comparaison=comparaison,f=frameFac,pvalRaw=pvalRaw,pathPNG=pathPNG,pathAnnot=pathAnnot,projet=projet,species=species)
+		print(graphFile)
+
+	  	fileMatrix <-paste(projet,"-04-filtre/",projet,"-matrix-filtreeMatrix.png",sep="")
+	  	fileTree <- paste(projet,"-04-filtre/atr.",projet,"-matrix-filtreeArray.png",sep="")
+
+		for(i in 1:length(graphFile)){
+
+			outImage<-sub("(.*).png","\\1",graphFile[i])
+			outImage<-paste(outImage,"-Stat.png",sep="")
+
+			graphStatClust(matrixImage=fileMatrix,boxImage=outfileColor, treeImage=fileTree,statImage=graphFile[i],outImage=outImage)	
+			versus<-paste(comparaison[1,i],"-VS-",comparaison[2,i],sep="")
+			if(i == 1){
+				appendFirst = FALSE
+			}else{
+				appendFirst = TRUE
+			}
+
+			tex_clusterImage(outImage, paste("rapport/graphCluster.tex",sep=""),versus,appendFirst,projet)
+			if(is.null(fileTexCluster)){
+				fileTexCluster<-paste(versus,".tex",sep="")
+			}else{
+				fileTexCluster<-c(fileTexCluster,paste(versus,".tex",sep=""))
+			}
+		}
+
+
+
+
 #	tex_question(fileTexCluster,paste("rapport/graphCluster.tex",sep=""))
-	 write.table(finalPV,file=paste(path,"/",projet,"-allpval.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
+	write.table(finalPV,file=paste(path,"/",projet,"-allpval.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
 	write.table(finalFC,file=paste(path,"/",projet,"-allFC.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
 	print(tabGenDiff)
 	tex_genDiff(tabGenDiff)
