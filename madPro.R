@@ -875,11 +875,11 @@ if(ratio!="FALSE" & bicoul == FALSE){
 				
   }
 #	tex_question(fileTexCluster,paste("rapport/graphCluster.tex",sep=""))
-  write.table(finalPV,file=paste(path,"/",projet,"-allpval.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
-  write.table(finalFC,file=paste(path,"/",projet,"-allFC.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
+	 write.table(finalPV,file=paste(path,"/",projet,"-allpval.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
+	write.table(finalFC,file=paste(path,"/",projet,"-allFC.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
 	print(tabGenDiff)
-  tex_genDiff(tabGenDiff)
-  tex_genDiff(tabGenDiffRaw,fileName="rapport/genDiffRaw.tex")
+	tex_genDiff(tabGenDiff)
+	tex_genDiff(tabGenDiffRaw,fileName="rapport/genDiffRaw.tex")
 	if(Annotation && nbListGene != 0){
 		resultDir<-paste(pathAnot,"/resultat",sep="")
 		commandAnnotation<-paste("gominer -p ",filePuce," -f ",fileList, " -s ", species, " -r ", resultDir,sep="")
@@ -896,7 +896,8 @@ if(ratio!="FALSE" & bicoul == FALSE){
 		
 	}else{
 		print("Aucun gene diff pour aucune question")
-		}
+	}
+
 	info<-toLatex(sessionInfo(),local=FALSE)
 	write(info,"rapport/info.tex")
 	print("FIN")

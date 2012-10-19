@@ -1,58 +1,158 @@
-detectCluster<-function(pval,seuil=1,seuilCluster=150,pas=200,comparaison_vect=FALSE,mat=FALSE,f=FALSE,out_name="detecClust.png" ){
-	require(genefilter)
-	require(MadProDev)
+clusterAnalyse<-function(mat,comparaison,f,pvalRaw,info,pathPNG="./",pathAnnot="./",projet="",species="h",seuil=2){
+
+	#Nom du fichier contenant toute les annotations
+	filePuce<-paste(pathAnnot,"/",projet,"-puce.txt",sep="")
+
+	#vecteur contenant le chemin de tous les graph
+	graphFile<-c()
+
+	if(!file.exists(filePuce)){
+		puce<-info$GeneName
+		write.table(puce,filePuce,sep="\t",quote=FALSE,row.names=FALSE,col.names=FALSE)
+	}
+
+	for(i in 1:ncol(comparaison)){
+
+		selectCoord<-NULL
+		#Detection
+		pas=nrow(mat) *0.7/100
+		coord<-detectCluster(pval=pval[,i],pas=pas,seuil=seuil)	
+		#Extraction	
+		prefixName<-paste(comparaison[1,i],comparaison[2,i],sep="-VS-")
+
+		if(!is.null(coord)){
+			extractCluster(coord,info,dir=pathAnnot,pref=prefixName)
+			#Annotation
+			fileList<-paste(pathAnnot,"/",prefixName,"/list.txt",sep="")
+			resultDir<-paste(pathAnnot,"/",prefixName,"/resultat",sep="")
+
+			if(file.exists(fileList)){
+				commandAnnotation<-paste("gominer -p ",filePuce," -f ",fileList, " -s ", species, " -r ", resultDir,sep="")
+				system(commandAnnotation)
+#Evaluation
+				clust<-1
+				filesSfdr<-dir(path=resultDir, pattern="^S_*")
+				gceName<-dir(path=resultDir,pattern="*gce*")
+				Ename<-dir(path=resultDir, pattern="^E_*")
+				GominerF=dir(path=resultDir, pattern="^[^E|S].*_fdrse")
+			
+				for (j in 1:length(filesSfdr)){
+					if(nrow(read.delim(paste(resultDir,filesSfdr[j],sep="/"))) !=0){
+
+						fileNamesGominer<-"rapport/AnnotationCluster.tex"
+						if(!file.exists("rapport")){
+							dir.create("rapport")
+						}
+
+						tmpFile<-paste(resultDir,"/",filesSfdr[j],sep="")
+
+						title<-sub("S_(.*)_(\\d*)\\.txt.*fdrse.txt","\\1 : Cluster ",filesSfdr[j])
+						title<-paste(title,clust,sep="")
+
+						tmpFdrName<-sub("S_(.*)_(\\d*)\\.txt.*fdrse.txt","S_\\1",filesSfdr[j])
+						tmpFdrName<-paste(tmpFdrName,"_",clust,".fdr.tsv",sep="")
+
+						tmpGceName<-sub("(.*)_(\\d*)\\.txt.*gce.txt","\\1",gceName[j])
+						tmpGceName<-paste(tmpGceName,"_",clust,".gce.tsv",sep="")
+
+						EnameTmp<-sub("E_(.*)_(\\d*)\\.txt.*fdrse.txt","E_\\1",Ename[j])
+						EnameTmp<-paste(EnameTmp,"_",clust,".fdr.tsv",sep="")
+
+						gName<-paste(resultDir,GominerF,sep="/")
+						file.remove(gName)
+
+
+						#repertoire annotation question
+						pathComp<-paste(pathAnnot,"/",prefixName,sep="")
+						#Nom du fichier contenant la liste des gnènes
+						prefix<-sub("S_(.*)_\\d*\\.txt.*fdrse.txt","\\1",filesSfdr[j])
+
+
+						fileListCluster<-paste(pathComp,"/",prefix,"_",j,".txt",sep="")
+						newFileListCluster<-paste(pathComp,"/",prefix,"_",clust,".txt",sep="")
+						file.rename(fileListCluster,newFileListCluster)
+
+						file.rename(paste(resultDir,filesSfdr[j],sep="/"),paste(resultDir,tmpFdrName,sep="/"))
+						file.rename(paste(resultDir,gceName[j],sep="/"),paste(resultDir,tmpGceName,sep="/"))
+						file.rename(paste(resultDir,Ename[j],sep="/"),paste(resultDir,EnameTmp,sep="/"))
+
+						tex_tab2tex(paste(resultDir,tmpFdrName,sep="/"),fileNamesGominer,title=title)
+
+						clust<-clust+1
+						selectCoord<-rbind(selectCoord,coord[j,])
+
+
+				}else{
+					prefix<-sub("S_(.*)(_\\d*)\\.txt.*fdrse.txt","\\1\\2",filesSfdr[j])
+					files2remove<-dir(path=resultDir,pattern=prefix)
+					files2remove<-paste(resultDir,files2remove,sep="/")
+					file.remove(files2remove)
+				}
+			}
+		}
+		#Graph cluster
+	}
+	out_name<-paste(pathPNG,"/",projet,prefixName,".png",sep="")
+	graphFile<-c(graphFile,out_name)	
+
+	f<-as.matrix(f)
+	mat<-as.matrix(mat)
+	m1<-meanByFact(mat,f,comparaison[1,i])
+	m2<-meanByFact(mat,f,comparaison[2,i])
+	logFC<-log2(m1/m2)
+	value<-sign(logFC) * -log10(pval[,i])
+#	value<-apply(tabmean,1,graphClustPval)
+	if(is.null(coord)){
+		selectCoord<-0	
+	}
+	
+		graphMmobile(filename=out_name,value=value,seuil=seuil,clust=selectCoord)
+	}
+
+	return(graphFile)
+}
+
+
+
+detectCluster<-function(pval,seuil=2,seuilCluster=150,pas=200,out_name="detecClust.jpg" ){
+	
 	value<- -log10(pval)
 	curveMobile<-rep(1/pas,pas)
 	fil<-filter(value,curveMobile)
 	select<- fil > seuil
 	selectm1<-select[-1]
-#indice de début et de fin, +1 pour le début car le TRUE et sur le "brin" de longeur n-1
-	begin<- which(select == FALSE & selectm1 == TRUE)
-	end<- which(select == TRUE & selectm1 == FALSE)
-
-
-	#sens graphe est de longeur n-1 donne le signe de l'indice n+1 (indice 1 de sens graphe donne le sens de l indice 2 de value
-	sensGraph<-sign(diff(fil))
+	selectm1[length(select)]<-NA
 	
-	#Preparation à l'extension des pics : Recherche de la prochaine vallé pour le début et la fin
+	#indice de début et de fin, +1 pour le début car le TRUE et sur le "brin" de longeur n-1
+
+	begin <- which(select == FALSE & selectm1 == TRUE)
+	end <- which(select == TRUE & selectm1 == FALSE)
+
+	if(length(begin) != 0){
+	
+		#sens graphe est de longeur n-1 donne le signe de l'indice n+1 (indice 1 de sens graphe donne le sens de l indice 2 de value
+		sensGraph<-sign(diff(fil))
 		
+		#Preparation à l'extension des pics : Recherche de la prochaine vallé pour le début et la fin
+		newBegin<-sapply(begin,extendBegin,sensGraph)
+		newEnd<-sapply(end,extendEnd,sensGraph)
 	
-	newBegin<-sapply(begin,extendBegin,sensGraph)
-	newEnd<-sapply(end,extendEnd,sensGraph)
+		tailleCluster<-newEnd - newBegin
+	
+		selectBegin<-newBegin[which(tailleCluster >= seuilCluster)]
+		selectEnd<-newEnd[which(tailleCluster >= seuilCluster)]
+		coordClust<-fusionCluster(selectBegin,selectEnd)
 
-	tailleCluster<-newEnd - newBegin
+		return(coordClust)
 
-	selectBegin<-newBegin[which(tailleCluster >= seuilCluster)]
-	selectEnd<-newEnd[which(tailleCluster >= seuilCluster)]
-		 print("TOTO")
-		f<-as.matrix(f)
-		mat<-as.matrix(mat)
-		if (comparaison_vect != FALSE){
-		comparaison_name <-paste(comparaison_vect[1],comparaison_vect[2],sep="-Vs-")
-		m1<-meanByFact(mat,f,comparaison_vect[1])
-		m2<-meanByFact(mat,f,comparaison_vect[2])
-		tabmean<-cbind(m1,m2,pval)
-		value<-apply(tabmean,1,graphClustPval)
-		}
-			
-		fil<-filter(value,curveMobile)
+	}else{
 
-
-	coordClust<-fusionCluster(selectBegin,selectEnd)
-	jpeg(filename = out_name, width = 1300, height = 900, quality = 100, bg = "white", res = NA)
-	par(mar=c(0,0,0,0),oma=c(0,0,0,0),mgp=c(0,0,0))
-	plot(value,pch=19,cex=0.8,cex.lab=1.5,cex.axis=3,col="slateblue",bty="n",xlab="",ylab="",xaxt="n",yaxt="n",xlim=c(1,length(value)),ylim=range(value,na.rm=TRUE))
-	lines(fil,lwd=5,col="orange2")
-	axis(side=2,tcl=0.5,label=TRUE,pos=c(0,0),cex.axis=3)
-	abline(h=seuil,lwd=2,pch=19,cex=0.8,cex.lab=1.5,cex.axis=1.5,col="darkgreen",lty=2)
-	abline(h=-seuil,lwd=2,pch=19,cex=0.8,cex.lab=1.5,cex.axis=1.5,col="darkgreen",lty=2)
-	abline(h=0,lwd=2,pch=19,cex=0.8,cex.lab=1.5,cex.axis=1.5,col="darkred")
-	abline(v=coordClust[,1],lwd=2,pch=19,cex=0.8,cex.lab=1.5,cex.axis=1.5,col=c(1:nrow(coordClust)))
-	abline(v=coordClust[,2],lwd=2,pch=19,cex=0.8,cex.lab=1.5,cex.axis=1.5,col=c(1:nrow(coordClust)))
-	dev.off()
+		return(NULL)	
+	}
 
 
 }
+
 extendBegin<-function(begin,sensGraph){
 	
 	test<-FALSE
@@ -134,4 +234,18 @@ fusionCluster<-function(begin,end){
 	print(finaleBegin)
 	print(finaleEnd)
 	return(coordClust)
+}
+extractCluster<-function(coordClust,info,pref="clust",dir="./"){
+
+	fileList<-paste(dir,"/",pref,"/list.txt",sep="")
+	for(i in 1:nrow(coordClust)){
+		clust<-info[coordClust[i,1] : coordClust[i,2],]$GeneName
+		pathName<-paste(dir,"/",pref,sep="")
+		if(!file.exists(pathName)){
+			dir.create(pathName)
+			}
+		outname<-paste(pathName,"/",pref,"_",i,".txt",sep="")
+		cat(outname,"\n",file=fileList,append=TRUE,sep="")
+		write.table(clust,outname,sep="\t",quote=FALSE,row.names=FALSE,col.names=FALSE)
+	}
 }

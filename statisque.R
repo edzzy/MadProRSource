@@ -66,7 +66,7 @@ function(comparaison_vect,mat,f,padj.method="none",pas=200,path=".",graph=TRUE,p
 	require(genefilter)
 	mat<-as.matrix(mat)
 	
-	comparaison_name <-paste(comparaison_vect[1],comparaison_vect[2],sep="-Vs-")
+	comparaison_name <-paste(comparaison_vect[1],comparaison_vect[2],sep="-VS-")
 	finale<-data.frame(row.names(mat))
 	
 	#CC <- mat[,which(f==comparaison_vect[1] | f == comparaison_vect[2])]
