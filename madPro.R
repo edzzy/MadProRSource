@@ -254,12 +254,8 @@ if(!file.exists(fileEch))
   stop("Le Fichier ",fileEch," est introuvable")
 ###Annotation des echantillons########  
 print ("début annotation des echantillons")
-#frameSample<-read.delim(fileEch)
-#frameFac<-createFactor4matrix2png(frameSample,namesArray,dye=dye,ratio)
 pData<-read.delim(fileEch,header=TRUE, row.names=1,sep="\t")
-#namesArray<-createNamesArray(pData)
 frameFac<-rbind(t(pData)[-1:-2,])
-#namesArray<-rownames(pData);
 if(is.null(dim(frameFac))){
 	frameFac<-as.data.frame(frameFac)
 }
@@ -275,7 +271,6 @@ if(fileGene != ""){
   answer<-paste("le fichier :",fileGene,"n'est pas present",sep=" ")
   if(!file.exists(fileGene))
     stop("Le fichier : ", fileGene," n'est pas present", sep="")
-	#infoGene<-read.delim(fileGene,header=TRUE,row.names=1,sep="\t")
 	namesGenes=read.delim(fileGene,header=FALSE,sep="\t")
 	namesGenes<-unlist(as.character(namesGenes[,1]))
 }else{
@@ -283,15 +278,14 @@ if(fileGene != ""){
 }
 
 #######################################################
-create_pathway(projet)
+treepath<-create_pathway(projet)
+treepath<-as.data.frame(treepath)
 
 # on lit la matrice
 if(typeArray == "GPR"){
   
   files<- dir(path=dirFile,pattern=".*\\.gpr$")
  
- # if (all(files != namesFiles))
-  #  	stop("Non correspondance entre les noms du fichiers d'annotation et les noms reels")
 	files<-paste(dirFile,files,sep="/")
 	dataMA<-read_GPR(files,namesArray)
 	
@@ -299,7 +293,6 @@ if(typeArray == "GPR"){
   
   
   files<- dir(path=dirFile,pattern="U.*\\.txt$")
-  #on change de repertoire
   
 	if (!all(file.exists(paste(dirFile,pData$nomFichiers,sep="/"))))
    	stop("Fichiers du fichier de config inexistant")
@@ -312,6 +305,10 @@ if(typeArray == "GPR"){
 		fileName<-paste(dirFile,fileName,sep="/")
 		tmpinfoGene<-infoGeneAnot[rownames(dataMA),]
 		tmpDataMA<-cbind(tmpinfoGene,dataMA)
+		write.table(tmpDataMA,fileName,row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)
+		fileName<- paste(projet,"-",nom_fichier,"-rawdataCtrlInfo.txt",sep="")
+		
+		fileName<-paste(treepath$resultatMat,fileName,sep="")
 		write.table(tmpDataMA,fileName,row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)
 		rm(tmpDataMA)
 	}
@@ -338,19 +335,11 @@ if(typeArray == "GPR"){
 }else if(typeArray=="NG"){
        
   files<- dir(path=dirFile,pattern=".*\\.pair$")
-  #on change de repertoire
   
   if (all(files != namesFiles))
     stop("Non correspondance entre les noms du fichiers d'annotation et les noms reels")
     files<-paste(dirFile,files,sep="/") 
 	read_NG(namesEch,files)
-}
-
-if(rmArray==TRUE){
-
-	dataMA<-rmArrayByNames(matnum_expre=dataMA,vech_namesArray= arrayRm)
-	frameFac<-rmArrayByNames(matnum_expre=frameFac,vech_namesArray = arrayRm)
-	print("RM array OK\n")
 }
 
 
@@ -363,21 +352,21 @@ fd<-paste(projet,"-01-stat-descriptive/",sep="")
 ##creation du boxplot
 print("Raw BoxPlot")
 
-output_name<-paste(fd,projet,"-",nom_fichier,"-raw-boxplot.jpeg",sep="")
+output_name<-paste(treepath$stat,projet,"-",nom_fichier,"-raw-boxplot.jpeg",sep="")
 create_boxplot(dataMA,output_name)
 
 ##Statistiques descriptives
-print("Statistiques descriptives")
-
-output_name = paste(fd,projet,"-",nom_fichier,"-raw-statClient.jpeg",sep="")
-create_stats_des(dataMA,output_name,minMax=FALSE)
-
-output_name = paste(fd,projet,"-",nom_fichier,"-raw-stat-des.jpeg",sep="")
-create_stats_des(dataMA,output_name)
+#print("Statistiques descriptives")
+#
+#output_name = paste(fd,projet,"-",nom_fichier,"-raw-statClient.jpeg",sep="")
+#create_stats_des(dataMA,output_name,minMax=FALSE)
+#
+#output_name = paste(fd,projet,"-",nom_fichier,"-raw-stat-des.jpeg",sep="")
+#create_stats_des(dataMA,output_name)
 ##Correlation
 print("Correlation")
 cat("** \nCorrelation avant normalisation\n",append=TRUE,file=logNames)
-output_name = paste(fd,projet,"-",nom_fichier,"-raw-correlation.jpeg",sep="")
+output_name = paste(treepath$stat,projet,"-",nom_fichier,"-raw-correlation.jpeg",sep="")
 echBadCor<-create_correlation_median(dataMA,output_name)
 if(!is.null(echBadCor)){
 	cat("echantillons dont la correlation avec le profil median est <0.8",echBadCor,"\n",append=TRUE,file=logNames)
@@ -388,34 +377,36 @@ if(!is.null(echBadCor)){
 ####NORMALISATION  (LOWESS)##########
 ####################################
 print("Normalisation")
-fd<-paste(projet,"-02-normalisation/",sep="")
+#fd<-paste(treepath$normalisation,"/",sep="")
 if(Normalise == "lowess"){
-print(system.time(dataN<-LOWESS(nom_fichier=nom_fichier,data=dataMA,pngDir=fd,profil.median="NA",graph=1,projet=projet)))
+	print(system.time(dataN<-LOWESS(nom_fichier=nom_fichier,data=dataMA,pngDir=treepath$normalisation,profil.median="NA",graph=1,projet=projet)))
 }else if(Normalise =="quantile"){
-	dataN<-normQuantile(mat=as.matrix(dataMA),pngDir = fd)
+	dataN<-normQuantile(mat=as.matrix(dataMA),pngDir = treepath$normalisation)
 	}
-nomFile = paste(fd,projet,"-",nom_fichier, "-normalisation.txt", sep="")
+nomFile = paste(treepath$normalisation,projet,"-",nom_fichier, "-normalisation.txt", sep="")
 write.table(dataN,nomFile,sep="\t",row.names=TRUE, col.names=NA,quote=FALSE)
 
 if(geneAnnot == TRUE){
-	fileName<- paste(fd,"/",projet,"-",nom_fichier,"-normalisationInfo.txt",sep="")
+	fileName<- paste(treepath$normalisation,projet,"-",nom_fichier,"-normalisationInfo.txt",sep="")
 	tmpinfoGene<-infoGeneAnot[rownames(dataN),]
 	tmpDataMA<-cbind(tmpinfoGene,dataN)
+	write.table(tmpDataMA,fileName,col.names=NA,sep="\t",quote=FALSE,row.names=TRUE);
+	fileName<- paste(treepath$resultatMat,projet,"-",nom_fichier,"-normalisationInfo.txt",sep="")
 	write.table(tmpDataMA,fileName,col.names=NA,sep="\t",quote=FALSE,row.names=TRUE);
 	rm(tmpDataMA)
 
 }
 fd<-paste(fd,"images/",sep="")
-imgNames<-paste(fd,projet,"-norImg.png",sep="")
+imgNames<-paste(treepath$normalisationImage,projet,"-norImg.png",sep="")
 #images comprenant tous les plot de normalisation 4 échantillons par image (avant apres avant/apres)
 print("montage image")
-montage_cmd<-paste(" montage ",fd,"*.png -tile 3x4 -geometry 100% -background none ", imgNames,sep="")
+montage_cmd<-paste(" montage ",treepath$normalisationImage,"*.png -tile 3x4 -geometry 100% -background none ", imgNames,sep="")
 print(system.time(try(system(montage_cmd))))
-imgMont<-dir(path=fd,pattern="*-norImg*")
-filesNorm<-paste(fd,imgMont,sep="")
+imgMont<-dir(path=as.character(treepath$normalisationImage),pattern="*-norImg*")
+filesNorm<-paste(treepath$normalisationImage,imgMont,sep="")
 
 ### verifier si le script fonctionne toujours avec des sortis gpr
-dataN = read.delim(paste(projet,"-02-normalisation/",projet,"-",nom_fichier,"-normalisation.txt",sep=""), sep="\t", header=TRUE, comment.char="",row.names=1)
+dataN = read.delim(paste(treepath$normalisation,projet,"-",nom_fichier,"-normalisation.txt",sep=""), sep="\t", header=TRUE, comment.char="",row.names=1)
 print("Fin Normalisation")
 ###################################
 
@@ -423,20 +414,20 @@ print("Fin Normalisation")
 ###GRAPHIQUE APRES NORMALISnormalisatioaATION#####
 ##creation du boxplot
 print("Boxplot Norm")
-output_name = paste(fd,projet,"-",nom_fichier,"-lowess.boxplot1.jpeg",sep="")
+output_name = paste(treepath$normalisationImage,projet,"-",nom_fichier,"-lowess-boxplot.jpeg",sep="")
 create_boxplot(dataN,output_name)
 
 ##Statistiques descriptives
-print("Statistiques descriptives Norm")
-output_name = paste(fd,projet,"-",nom_fichier,"-lowess-stat-des.jpeg",sep="")
-create_stats_des(dataN,output_name)
-
-output_name = paste(fd,projet,"-",nom_fichier,"-lowess-statClient.jpeg",sep="")
-create_stats_des(dataN,output_name,minMax=FALSE)
+#print("Statistiques descriptives Norm")
+#output_name = paste(fd,projet,"-",nom_fichier,"-lowess-stat-des.jpeg",sep="")
+#create_stats_des(dataN,output_name)
+#
+#output_name = paste(fd,projet,"-",nom_fichier,"-lowess-statClient.jpeg",sep="")
+#create_stats_des(dataN,output_name,minMax=FALSE)
 ##Correlation apres normalisation
 print("Correlation Norm")
 cat("** \nCorrelation apres normalisation\n",append=TRUE,file=logNames)
-output_name = paste(fd,projet,"-",nom_fichier,"-lowess-correlation.jpeg",sep="")
+output_name = paste(treepath$normalisationImage,projet,"-",nom_fichier,"-lowess-correlation.jpeg",sep="")
 echBadCorNorm<-create_correlation_median(dataN,output_name)
 
 if(!is.null(echBadCorNorm)){
@@ -449,7 +440,7 @@ print("ecriture rapport preproc")
 ##Génération fichiers TEX stat Descr et corrélation
 tex_importData(typeArray,dye,ratio)
 tex_norm(projet,filesNorm)
-tex_StatDesc(projet,nom_fichier)
+tex_boxplot(projet,nom_fichier)
 tex_Corre(projet,echBadCor,echBadCorNorm,nom_fichier)
 
 

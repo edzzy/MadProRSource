@@ -263,6 +263,19 @@ tex_StatDesc<-function(projet,nom_fichier){
   file="rapport/graphStatDesc.tex", append=TRUE)
 }
 
+tex_boxplot<-function(projet="",nom_fichier="tex_boxplot.tex"){
+  cat("\\begin{figure}[H]\n
+    \\centering\n
+    \\begin{tabular}{cc}\n", file = "rapport/graphStatDesc.tex")
+      include1<-paste("\\includegraphics[scale=0.20]{../",projet,"-01-stat-descriptive/",projet,"-",nom_fichier,"-raw-boxplot} &\n",sep="")
+      include2<-paste("\\includegraphics[scale=0.20]{../",projet,"-02-normalisation/images/",projet,"-",nom_fichier,"-lowess-boxplot.jpeg} \\\\\n",sep="")
+      cat(include1, include2,file="rapport/graphStatDesc.tex", append=TRUE) 
+        cat("(a) & (b) \\\\\n 
+    \\end{tabular}\n
+        \\caption{\\label{statDes}Statistiques descriptives avant (a) et après (b) normalisation}\n
+\\end{figure}\n",
+  file="rapport/graphStatDesc.tex", append=TRUE)
+}
 
 tex_tab2tex<-function(fileGominer,fileName,title,n=10,append=TRUE){
 #Fonction qui transforme un fichier tabule gominer en fichier de sortie LaTex avec les n premieres lignes
