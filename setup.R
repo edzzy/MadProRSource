@@ -103,3 +103,92 @@ colnames(treepath)[ncol(treepath)]<-"resultatGeneDiffAnnot"
 return(as.data.frame(treepath))
 }
 
+getPattern<-function(file){
+
+	pattern<-read.delim(file,skip=1,nrow=1,header=TRUE)$FeatureExtractor_PatternName
+	
+	return(as.character(pattern))
+	
+}
+
+getInfo<-function(file){
+
+	design<-getPattern(file)
+	infoName<-paste(system.file("extdata",package="MadProDev"),"/",design,sep="")
+	if(file.exists(infoName)){
+		info<-read.delim(infoName,header=TRUE,row.names=1)
+		return(info)
+	}else{
+		message<-paste("Pas de fichier d'annotation défini pour ", design," un fichier à été creer mettre à jour Le package",sep="")
+		info<-createAgilentAnnotation(file)
+		warnings(message)
+		return(info)	
+	}
+}
+
+getPuceInfo<-function(design){
+	puceName<-paste(system.file("extdata",package="MadProDev"),"/puce",sep="")
+	puce<-read.delim(puceName)
+	info<-puce[which(puce[,1] == design),]
+	if(nrow(info) != 0){
+		return(info)
+	}else{
+		return(NULL)	
+	}
+}
+createAgilentAnnotation<-function(file){
+	info<-data.frame()
+	if(!file.exists(file)){
+			mess<-paste("file : ", file, " doesn't exists",sep="")
+			stop(mess)
+		}
+
+	tmp<-read.delim(file,skip=9,header=TRUE)
+if(!is.null(tmp$FeatureNum)){
+	info<-cbind(tmp$FeatureNum)
+	colnames(info)<-c("FeatureNum")
+}else{
+	stop("Champs FeatureNum n'existe pas")
+	}
+if(!is.null(tmp$accessions))
+	info<-cbind(info,as.character(tmp$accessions))
+	colnames(info)[ncol(info)]<-"accessions"
+if(!is.null(tmp$chr_coord))
+	info<-cbind(info,as.character(tmp$chr_coord))
+	colnames(info)[ncol(info)]<-"chr_coord"
+if(!is.null(tmp$Start))
+	info<-cbind(info,as.character(tmp$Start))
+	colnames(info)[ncol(info)]<-"Start"
+if(!is.null(tmp$Sequence))
+	info<-cbind(info,as.character(tmp$Sequence))
+	colnames(info)[ncol(info)]<-"Sequence"
+if(!is.null(tmp$ProbeUID))
+	info<-cbind(info,as.character(tmp$ProbeUID))
+	colnames(info)[ncol(info)]<-"ProbeUID"
+if(!is.null(tmp$ControlType))
+	info<-cbind(info,as.character(tmp$ControlType))
+	colnames(info)[ncol(info)]<-"ControlType"
+if(!is.null(tmp$ProbeName))
+	info<-cbind(info,as.character(tmp$ProbeName))
+	colnames(info)[ncol(info)]<-"ProbeName"
+if(!is.null(tmp$GeneName)){
+	info<-cbind(info,as.character(tmp$GeneName))
+	colnames(info)[ncol(info)]<-"GeneName"
+}else{
+	stop("Champs GeneName n'existe pas")
+}
+if(!is.null(tmp$SystematicName))
+	info<-cbind(info,as.character(tmp$SystematicName))
+	colnames(info)[ncol(info)]<-"SystematicName"
+if(!is.null(tmp$Description ))
+	info<-cbind(info,as.character(tmp$Description))
+	colnames(info)[ncol(info)]<-"Description"
+
+madId<-paste(tmp$FeatureNum,"//",tmp$GeneName,sep="")
+rownames(info)<-madId
+pattern<-getPattern(file)
+write.table(info,pattern,row.names=FALSE,sep="\t",quote=FALSE)
+
+	return(info)
+
+}
