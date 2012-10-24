@@ -192,3 +192,217 @@ write.table(info,pattern,row.names=FALSE,sep="\t",quote=FALSE)
 	return(info)
 
 }
+
+
+verfifParam<-function(pSetupfile){
+	
+	if(!file.exists(pSetupFile))
+	  stop("Le fichier", pSetupFile," n'est pas present")
+	pSetup<-read.delim(pSetupFile,row.names=1,header=FALSE,stringsAsFactors=FALSE,sep="\t")
+	pSetup<-t(pSetup)
+	pSetup<-as.data.frame(pSetup)
+	if(nrow(pSetup) != 1)
+		stop("Mauvais formatage du fichier ",pSetupFile,". Nombre de colone > 1. Veuillez vérifier si il n'existe pas de tabulations parasite en fin de lignes.") 
+	cat("\n",date(),"\n",file="error.log",append=TRUE)
+	
+	#-Import/Verification du nom de projet
+	
+	if(!is.null(pSetup$Projet)){
+		pSetup$projet<-paste(as.character(projet),format(Sys.time(),"%y%m%d"),sep="-")
+	}else{
+		CheckError=TRUE
+		cat("Le nom du projet est manquant dans le fichier : ", pSetupFile,"\n",file="error.log",append=TRUE)
+		nError <- nError +1
+	}
+	
+	#-Import/Verification du prefixe des noms des matrices. 
+	
+	
+	#Import/Verification du type d'array agilent=AG ou gpr=GPR nimbelgen=NG
+	if(!is.null(pSetup$typeArray)){
+		typeArray<- as.character(pSetup$typeArray) 
+		typeArray<-toupper(typeArray)
+		if(typeArray != "AG" & typeArray != "GPR" & typeArray != "NG"){
+			CheckError=TRUE
+			cat("Le type d'array n'est pas le bon dans le fichier : ", pSetupFile," indiquer AG pour agilent, NG pour nimbelGen ou GPR pour genepix\n", file="error.log",append=TRUE)
+			nError <- nError +1
+		}
+	}else{
+		CheckError=TRUE
+		cat("Le type d'array n'est pas spécifié dans le fichier : ", pSetupFile,"\n", file="error.log",append=TRUE)
+		nError <- nError +1
+	}
+	
+	#nombre de sondes pour la test matrice aleatoire.
+	
+	
+	if(!is.null(pSetup$fileEch)){
+		pSetup$fileEch<-as.character(pSetup$fileEch)
+		if(!file.exists(fileEch)){
+			CheckError=TRUE
+			cat("Le fichier d'annotation des echantillons ",fileEch," est introuvable.\n", file="error.log",append=TRUE)
+			nError <- nError +1
+		}
+	}else{
+			CheckError=TRUE
+			cat("Le parametre fileEch n'est pas spécifié dans le fichier : ", pSetupFile,"\n", file="error.log",append=TRUE)
+			nError <- nError +1
+	
+	}
+	###
+	
+	if(!is.null(pSetup$fileGene)){
+		pSetup$fileGene<-as.character(pSetup$fileGene)
+		if(!file.exists(fileGene)){
+			CheckError=TRUE
+			cat("Le fichier des madProID ",fileGene," est introuvable.\n", file="error.log",append=TRUE)
+			nError <- nError +1
+		}
+	}else{
+			CheckError=TRUE
+			cat("Le parametre fileGene n'est pas spécifié dans le fichier : ", pSetupFile,"\n", file="error.log",append=TRUE)
+			nError <- nError +1
+	}
+	
+	####
+	if(!is.null(pSetup$dirFile)){
+		dirFile<-as.character(pSetup$dirFile)
+		if(!file.exists(dirFile)){
+			CheckError=TRUE
+			cat("Le repertoire : ",dirFile," est introuvable.\n", file="error.log",append=TRUE)
+			nError <- nError +1
+		}
+	}else{
+			CheckError=TRUE
+			cat("Le parametre dirFile n'est pas spécifié dans le fichier : ", pSetupFile,"\n", file="error.log",append=TRUE)
+			nError <- nError +1
+	}
+	
+	###
+	if(!is.null(pSetup$nval)){
+		nval<-as.numeric(as.character(pSetup$nval))
+		if(nval < 0 | nval > 100){
+			CheckError=TRUE
+			cat("Le parametre nval doit être compris entre 0 et 100 il s'agit d'un pourcentage.\n", file="error.log",append=TRUE)
+			nError <- nError +1
+		}
+	}else{
+			CheckError=TRUE
+			cat("Le parametre nval n'est pas spécifié dans le fichier : ", pSetupFile,"\n", file="error.log",append=TRUE)
+			nError <- nError +1
+	}
+	#nbclasses<-as.numeric(pSetup$nclasses)
+	
+	if(!is.null(pSetup$filterParam)){
+		filterParam<-as.numeric(as.character(pSetup$filterParam))
+	}else{
+			CheckError=TRUE
+			cat("Le parametre filterParam n'est pas spécifié dans le fichier : ", pSetupFile,"\n", file="error.log",append=TRUE)
+			nError <- nError +1
+	}
+	
+	if(!is.null(pSetup$dye)){
+		dye<-as.numeric(as.character(pSetup$dye))
+		if(dye != 1 & dye !=2 ){
+			CheckError=TRUE
+			cat("Le parametre dye doit être 1 ou 2.\n", file="error.log",append=TRUE)
+			nError <- nError +1
+		}
+	}else{
+			CheckError=TRUE
+			cat("Le parametre dye n'est pas spécifié dans le fichier : ", pSetupFile,"\n", file="error.log",append=TRUE)
+			nError <- nError +1
+	}
+	##-Test parametre si le fichier contenant les controles est présents.
+	
+	if(rmCTRL == TRUE){
+		if(!is.null(pSetup$controle)){
+			controle<-as.character(pSetup$controle)
+			if(!file.exists(controle)){
+				cat("Le fichier : ",controle , " contenant les controle est introuvable\n",file="error.log",append=TRUE)
+			nError <- nError +1
+				CheckError=TRUE
+			}
+		}else{
+			cat("Le parametre controle n'est pas spécifié dans le fichier : ", pSetupFile,"\n", file="error.log",append=TRUE)
+			nError <- nError +1
+			CheckError=TRUE
+		}
+	}
+	
+	geneAnnot = FALSE
+	if(!is.null(pSetup$info)){
+		infoGene<-as.character(pSetup$info)
+		if(!file.exists(infoGene))
+	  	stop("Le fichier ",infoGene, " est introuvable")
+		infoGeneAnot<-read.delim(infoGene,header=TRUE,sep="\t",row.names=1)
+		geneAnnot = TRUE
+	}
+	
+	if(is.null(pSetup$comparFile)){
+		comparaison<-NULL
+	}else{
+		comparFile<-as.character(pSetup$comparFile) 
+		if(!file.exists(comparFile))
+			stop("le fichier", comparFile, " est introuvable") 
+			comparaison<-read.delim(comparFile,header=FALSE, sep="\t")
+	}
+	
+	if(is.null(pSetup$ratio)){
+	  ratio<-NULL
+	}else{
+		ratio<-as.character(pSetup$ratio) 
+	  ratio<-unlist(strsplit(ratio,"/"))
+	}
+	
+	if(is.null(pSetup$bicoul)){
+	  bicoul<-FALSE
+	}else{
+	  bicoul<-as.character(pSetup$bicoul)
+	  if(!(bicoul == "TRUE" | bicoul == "FALSE")){
+	    cat("Le parametre bicoul doit être boolean TRUE ou FALSE\n",file="error.log",append=TRUE)
+	  	nError <- nError +1
+				CheckError=TRUE
+	    }else{
+	      if(bicoul == "TRUE"){
+	        bicoul<-TRUE
+	      }else{
+	        bicoul<-FALSE
+	      }
+	      
+	      
+	    }
+	}
+	if(rmArray == TRUE){
+		if(!is.null(pSetup$rmArrayFile)){
+			rmArrayFile<-as.character(pSetup$rmArrayFile)
+			if(!file.exists(rmArrayFile))
+				stop("le fichier", rmArrayFile, " est introuvable") 
+				arrayRm<-read.delim(rmArrayFile,header=FALSE, sep="\t",stringsAsFactor = FALSE)
+				arrayRm<-unlist(arrayRm)
+		}else{
+			cat("Le parametre rmArrayFile n'est pas spécifié dans le fichier : ", pSetupFile,"\n", file="error.log",append=TRUE)
+			nError <- nError +1
+			CheckError=TRUE
+		}
+	}
+	if(!is.null(pSetup$species)){
+		species = as.character(pSetup$species)
+		if(species == "h" || species == "m" || species == "r" || species == "d"){
+			Annotation=TRUE
+		}else{
+			stop("Espece pour l'annotation incorecte h : Human, m : Mouse : r : Rat , d : Chien")
+		}
+		
+	}
+	if(CheckError){
+		stop("Il y a eu ",nError," erreurs lors du setup du pipeline veillez regarder le fichier error.log pour les corriger" )
+	}
+	print ("Fin Setup de l'analyse")
+	
+	
+	
+	
+	
+	}
+
