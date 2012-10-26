@@ -146,7 +146,7 @@ tex_genDiff<-function(tabGenDiff,projet,fileName="rapport/genDiff.tex"){
 }
 
 
-tex_importData<-function(typeArray,dye,ratio){
+tex_importData<-function(typeArray,dye){
   
 	puce<-NULL
 	color<-NULL
@@ -158,17 +158,18 @@ tex_importData<-function(typeArray,dye,ratio){
 		puce<-"Agilent"
 		scan<-"Feature Extraction"
 		file<-"txt"
-	if(dye == 2 & ratio == "FALSE"){
+	if(dye == 2 ){
 		color<-"Pseudo-MonoCouleur"
 		colo<-"des colonnes gMedianSignal et rMedianSignal.\n"
 	}else if(dye == 1){
 		color<-"MonoCouleur"
 		colo<-"de la colonne gMedianSignal."
-	}else if(dye == 2 & ratio != "FALSE"){
-		color<-"Bicouleur et ratio"
-		colo<-"des colonnes gMedianSignal et rMedianSignal.\n"
-		ratioText<-paste("Pour l'analyse en ratio, les rapports ont été fait de la façon suivante : $\\frac{",ratio[1],"}{",ratio[2],"}$")
 	}
+#else if(dye == 2 & ratio != "FALSE"){
+#		color<-"Bicouleur et ratio"
+#		colo<-"des colonnes gMedianSignal et rMedianSignal.\n"
+#		ratioText<-paste("Pour l'analyse en ratio, les rapports ont été fait de la façon suivante : $\\frac{",ratio[1],"}{",ratio[2],"}$")
+#	}
 	}else if( typeArray == "NG"){
 		puce<-"NimbelGen"
 		scan<-"NimbelScan"
