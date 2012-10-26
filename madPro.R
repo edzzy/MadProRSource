@@ -1,5 +1,5 @@
 `madPro` <-
-function(pSetupFile="pSetup.txt",Normalise="L",clusteringALEA=TRUE,Filtrage=TRUE,Cluster=TRUE,tStat=TRUE,import=TRUE){
+function(pSetupFile="pSetup.txt",Normalise="L",clusteringALEA=TRUE,Filtrage=TRUE,Cluster=TRUE,tStat=TRUE,import=TRUE,Annotation=TRUE){
 
 if(import){
 	nError = 0
@@ -297,9 +297,7 @@ if(Filtrage==TRUE){
 	
 	}
 
-	if(savingData == TRUE){
 		save(projet,frameFacN,dataN,sampMatrix,pData,file=paste(projet,"-dataNorm.Rdata",sep=""))
-	}
 	
 	####Filtrage matrice totale
 	print("filtrage matrice totale")
@@ -332,8 +330,9 @@ if(clustering==TRUE){
 	
 	################Clustering de la matrice totale
 	print("debut clustering matrice totale")
-	commandCluster<-paste(" cluster -f ",filterName," -l  -cg m -g 1 -e 1  -m c",sep="")
-	print(system.time(system(commandCluster)))
+	m.filtered<-clusterEinsen(filterName)
+#	commandCluster<-paste(" cluster -f ",filterName," -l  -cg m -g 1 -e 1  -m c",sep="")
+#	print(system.time(system(commandCluster)))
 	
 	print("fin clustering matrice totale")
 
@@ -349,17 +348,17 @@ if(clustering==TRUE){
 	
 	
 	filterNamecdt<-paste(projet,"-04-filtre/",projet,"-matrix-filtree.cdt",sep="")
-	matcdt<-read.delim(filterNamecdt,sep="\t")
-	#ordonne la matrice normalisé filtre selon le cdt
-	nG<-as.vector(matcdt[,2])
-	nG<-nG[-1:-2]
-	nG<-as.character(nG)
-	m.filtered<-m.filtered[nG,]
-	frameFacF<-frameFac
-	infocdt<-infoGeneAnot[as.character(matcdt[,2]),]
-	newcdt<-cbind(matcdt$GID,infocdt,matcdt[,3:ncol(matcdt)])
-	colnames(newcdt)[1]<-"GID"
-	write.table(newcdt,filterNamecdt,sep="\t",row.names=FALSE,quote=FALSE)
+#	matcdt<-read.delim(filterNamecdt,sep="\t")
+#	#ordonne la matrice normalisé filtre selon le cdt
+#	nG<-as.vector(matcdt[,2])
+#	nG<-nG[-1:-2]
+#	nG<-as.character(nG)
+#	m.filtered<-m.filtered[nG,]
+#	frameFacF<-frameFac
+	infocdt<-infoGeneAnot[as.character(row.names(m.filtered,]
+	newcdt<-cbind(infocdt,m.filtered)
+#	colnames(newcdt)[1]<-"GID"
+	write.table(newcdt,filterNamecdt,sep="\t",row.names=TRUE,quote=FALSE)
 	 rm(newcdt)
 	 rm(matcdt)
 	
@@ -394,7 +393,7 @@ if(clustering==TRUE){
 
 }
 ########test stat
-if(geneDiff==TRUE){
+if(tStat==TRUE){
 	print("test stat")
 	finalPV <- NULL
 	finalFC <- NULL
