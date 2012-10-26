@@ -212,11 +212,12 @@ if(Filtrage==TRUE){
 
 		################
 		###Cluster######
-		print("debut clustering matrice aleatoire")
-		commandCluster<-paste(" cluster -f ",sampleMName," -l  -cg m -g 1 -e 1  -m c",sep="")
-		print(system.time(try(system(commandCluster,intern=TRUE))))
-		print("fin clustering matrice aleatoire")
-		print("image matrice cluster aleatoire")
+		sampMatrix<-clusterEinsen(f=sampleMName)
+	#	print("debut clustering matrice aleatoire")
+	#	commandCluster<-paste(" cluster -f ",sampleMName," -l  -cg m -g 1 -e 1  -m c",sep="")
+	#	print(system.time(try(system(commandCluster,intern=TRUE))))
+	#	print("fin clustering matrice aleatoire")
+	#	print("image matrice cluster aleatoire")
 		commandSlcviewMatrix<-paste(" slcview.pl ",sampleMPrefix,".cdt -xsize 25 -height 1300 -genelabel 0 -gtrresolution 0 -arraylabels 0 -atrresolution 0 -o ",sampleMPrefix,"Matrix.png" ,sep="" )
 	
 		print(system.time(try(system(commandSlcviewMatrix))))
@@ -230,20 +231,20 @@ if(Filtrage==TRUE){
 	
 	################
 	###Filtrage######
-		nameCDT<-paste(projet,"-03-clusterAleatoire/",projet,"-",nom_fichier,alea,"sample.cdt",sep="")
-		print("filtrage matrice aleatoire")
-		matSamplecdt<-read.delim(nameCDT,sep="\t")
-
-	#ordonne la matrice normalisé
-		nG<-as.vector(matSamplecdt[,2])
-		nG<-nG[-1:-2]
-		nG<-as.character(nG)
-		nA<-colnames(matSamplecdt)
-		nA<-nA[-1:-4]
-		rm(matSamplecdt)
-	###############
-		sampMatrix<-sampMatrix[,nA]
-		sampMatrix<-sampMatrix[nG,]
+#		nameCDT<-paste(projet,"-03-clusterAleatoire/",projet,"-",nom_fichier,alea,"sample.cdt",sep="")
+#		print("filtrage matrice aleatoire")
+#		matSamplecdt<-read.delim(nameCDT,sep="\t")
+#
+#	#ordonne la matrice normalisé
+#		nG<-as.vector(matSamplecdt[,2])
+#		nG<-nG[-1:-2]
+#		nG<-as.character(nG)
+#		nA<-colnames(matSamplecdt)
+#		nA<-nA[-1:-4]
+#		rm(matSamplecdt)
+#	###############
+#		sampMatrix<-sampMatrix[,nA]
+#		sampMatrix<-sampMatrix[nG,]
 	#####################Utilisation de matrix2png pour le clustering de la matrice aleatoire
 	
 		mapName<-paste(substr(projet,1,(nchar(projet) - 7)),"-color.txt",sep="")

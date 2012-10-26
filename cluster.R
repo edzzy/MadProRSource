@@ -249,3 +249,67 @@ extractCluster<-function(coordClust,info,pref="clust",dir="./"){
 		write.table(clust,outname,sep="\t",quote=FALSE,row.names=FALSE,col.names=FALSE)
 	}
 }
+clusterEinsen<-function(f,l=TRUE,cg="m",ng=FALSE,na=FALSE,ca=NULL,u=NULL,g=1,e=1,m="c",k=NULL,r=NULL,pg=NULL,pas=NULL,s=NULL,x=2,y=1){
+	if(!file.exists(f)){
+		message<-paste("Fichier : ", f , " n'existe pas",sep="")
+		stop(message)
+	}else{
+		commandCluster<-paste("cluster -f",f)
+	}
+	if(l ==TRUE){
+		commandCluster<-paste(commandCluster,"-l")	
+	}
+	if(!is.null(cg)){
+		if(cg == "m" | cg == "a"){
+			commandCluster<-paste(commandCluster,"-cg",cg)	
+		}else{
+			stop("cg doit être m ou a")	
+		}
+	}
+	if(!is.null(ca)){
+		if(ca == "m" | ca == "a"){
+			commandCluster<-paste(commandCluster,"-ca",cg)	
+		}else{
+			stop("ca doit être m ou a")	
+		}
+	}
+	if(ng == TRUE){
+		commandCluster<-paste(commandCluster,"-ng")	
+	}
+	if(na == TRUE){
+		commandCluster<-paste(commandCluster,"-na")	
+	}
+	if(as.integer(g) <=8 | as.integer(g) >=0){
+			commandCluster<-paste(commandCluster,"-g",g)	
+	}else{
+		stop("g doit être compris entre 0 et 8")	
+	}
+	if(as.integer(e) <=8 | as.integer(e) >=0){
+			commandCluster<-paste(commandCluster,"-e",e)	
+	}else{
+		stop("e doit être compris entre 0 et 8")	
+	}
+
+
+	if(!is.null(m)){
+		if(m == "m" | m == "a" | m == "s" | m =="c" ){
+			commandCluster<-paste(commandCluster,"-m",m)	
+		}else{
+			stop("m doit être m, a, s, c")	
+		}
+	}
+
+	print(commandCluster)
+	system(commandCluster)
+	filecdt<-gsub(x=f,pattern=".txt",replacement=".cdt")
+	data<-read.delim(file=f,header=TRUE,row.names=1)
+	dataClust<-read.delim(file=filecdt,header=TRUE,row.names=1)
+	geneNames<-dataClust$NAME[-1:-2]
+	sampleNames<-colnames(dataClust)[which(!is.na(dataClust[2,]))][-1:-2]
+	
+	data<-data[geneNames,]
+	data<-data[,sampleNames]
+
+	return(data)
+
+}
