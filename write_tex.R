@@ -34,13 +34,13 @@ tex_clusterImage<-function(fileCluster,tex_file,versus,appendFirst,projet){
 
 
 
-tex_Corre<-function(projet,echBadCor,echBadCorNorm,nom_fichier){
+tex_Corre<-function(projet,echBadCor,echBadCorNorm){
   
 	cat("\\begin{figure}[H]\n                                                                                                 
     \\centering\n
     \\begin{tabular}{cc}\n",file="rapport/graphCorrelation.tex",append=FALSE)
-     include1=paste("\\includegraphics[scale=0.20]{../",projet,"-01-stat-descriptive/",projet,"-",nom_fichier,"-raw-correlation.jpeg} &\n",sep="")
-    include2=paste("\\includegraphics[scale=0.20]{../",projet,"-02-normalisation/images/",projet,"-",nom_fichier,"-lowess-correlation.jpeg} \\\\\n",sep="")
+     include1=paste("\\includegraphics[scale=0.20]{../",projet,"-01-stat-descriptive/",projet,"-raw-correlation.jpeg} &\n",sep="")
+    include2=paste("\\includegraphics[scale=0.20]{../",projet,"-02-normalisation/images/",projet,"-lowess-correlation.jpeg} \\\\\n",sep="")
      cat(include1,include2,file="rapport/graphCorrelation.tex",append=TRUE)
      cat("(a) & (b) \\\\\n
     \\end{tabular}\n
@@ -203,9 +203,6 @@ tex_importData<-function(typeArray,dye){
 				"\\\\Les sondes contrôles sont retirées lors de l'analyse.\n
 				\\par\n",sep="")
 
-	if(!is.null(ratio)){
-		paragraphe<-paste(paragraphe,ratioText,sep="")
-	}
 
 	cat(paragraphe,file="rapport/importData.tex",append=FALSE)
 
@@ -250,12 +247,12 @@ tex_question<-function(vectFile,texFile){
 	
 }
 
-tex_StatDesc<-function(projet,nom_fichier){
+tex_StatDesc<-function(projet){
   cat("\\begin{figure}[H]\n
     \\centering\n
     \\begin{tabular}{cc}\n", file = "rapport/graphStatDesc.tex")
-      include1<-paste("\\includegraphics[scale=0.20]{../",projet,"-01-stat-descriptive/",projet,"-",nom_fichier,"-raw-statClient} &\n",sep="")
-      include2<-paste("\\includegraphics[scale=0.20]{../",projet,"-02-normalisation/images/",projet,"-",nom_fichier,"-lowess-statClient.jpeg} \\\\\n",sep="")
+      include1<-paste("\\includegraphics[scale=0.20]{../",projet,"-01-stat-descriptive/",projet,"-raw-statClient} &\n",sep="")
+      include2<-paste("\\includegraphics[scale=0.20]{../",projet,"-02-normalisation/images/",projet,"-lowess-statClient.jpeg} \\\\\n",sep="")
       cat(include1, include2,file="rapport/graphStatDesc.tex", append=TRUE) 
         cat("(a) & (b) \\\\\n 
     \\end{tabular}\n
@@ -264,12 +261,12 @@ tex_StatDesc<-function(projet,nom_fichier){
   file="rapport/graphStatDesc.tex", append=TRUE)
 }
 
-tex_boxplot<-function(projet="",nom_fichier="tex_boxplot.tex"){
+tex_boxplot<-function(projet=""){
   cat("\\begin{figure}[H]\n
     \\centering\n
     \\begin{tabular}{cc}\n", file = "rapport/graphStatDesc.tex")
-      include1<-paste("\\includegraphics[scale=0.20]{../",projet,"-01-stat-descriptive/",projet,"-",nom_fichier,"-raw-boxplot} &\n",sep="")
-      include2<-paste("\\includegraphics[scale=0.20]{../",projet,"-02-normalisation/images/",projet,"-",nom_fichier,"-lowess-boxplot.jpeg} \\\\\n",sep="")
+      include1<-paste("\\includegraphics[scale=0.20]{../",projet,"-01-stat-descriptive/",projet,"-","-raw-boxplot} &\n",sep="")
+      include2<-paste("\\includegraphics[scale=0.20]{../",projet,"-02-normalisation/images/",projet,"-lowess-boxplot.jpeg} \\\\\n",sep="")
       cat(include1, include2,file="rapport/graphStatDesc.tex", append=TRUE) 
         cat("(a) & (b) \\\\\n 
     \\end{tabular}\n

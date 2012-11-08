@@ -1,11 +1,11 @@
 `madPro` <-
-function(pSetupFile="pSetup.txt",Normalise="L",clusteringALEA=TRUE,Filtrage=TRUE,Cluster=TRUE,tStat=TRUE,import=TRUE,Annotation=TRUE){
+function(pSetupFile="pSetup.txt",Normalise="L",clusteringALEA=TRUE,Filtrage=TRUE,Cluster=TRUE,tStat=TRUE,import=TRUE,Annotation=TRUE,clustering=TRUE,dCluster=TRUE){
 
 if(import){
 	nError = 0
 	#-Importation du fichier de setup
 	print("Debut Setup de l'analyse")
-	Print("Verification configuration analyse")
+	print("Verification configuration analyse")
 #################################################
 	if(verifParam(pSetupFile)){
 		message<-paste("Mauvaise configuration de ", pSetupFile,sep="")
@@ -23,6 +23,7 @@ if(import){
 	nval<-getNval(pSetup)
 	comparFile<-getComparFile(pSetup)
 	comparaison<-read.delim(comparFile,header=FALSE)
+	alea<-getAlea(pSetup)
 
 ############## PIPELINE ANALYSE###################
 	logNames<-paste(projet,".log",sep="")
@@ -72,29 +73,35 @@ if(import){
 		puceInfo<-getPuceInfo(getPattern(files[1]))
 		print(puceInfo)
 		species<-as.character(puceInfo$Species)
-		dye<-as.character(puceInfo$Dye)
+		dye<-as.character(puceInfo$dye)
 
 		dataMA<-read_Agilent(pData=pData,namesGenes=as.character(row.names(infoGeneAnot)),type="AG",pathDir=dirFile)
 
-		fileName<- paste(projet,"-",nom_fichier,"-rawdataCtrlInfo.txt",sep="")
+		fileName<- paste(projet,"-rawdataCtrlInfo.txt",sep="")
 		fileName<-paste(dirFile,fileName,sep="/")
 		tmpinfoGene<-infoGeneAnot[rownames(dataMA),]
 		tmpDataMA<-cbind(tmpinfoGene,dataMA)
-		write.table(tmpDataMA,fileName,row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)
-		fileName<- paste(projet,"-",nom_fichier,"-rawdataCtrlInfo.txt",sep="")
+		if(!file.exists(fileName)){
+			write.table(tmpDataMA,fileName,row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)
+		}
+		fileName<- paste(projet,"-rawdataCtrlInfo.txt",sep="")
 	
 		fileName<-paste(treepath$resultatMat,fileName,sep="")
-		write.table(tmpDataMA,fileName,row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)
+		if(!file.exists(fileName)){
+			write.table(tmpDataMA,fileName,row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)
+		}
 		rm(tmpDataMA)
 
 	
 		control<-which(infoGeneAnot$ControlType != 0)
 		dataMA<-dataMA[-control,]
 
-		fileName<- paste(projet,"-",nom_fichier,"-rawdata.txt",sep="")
+		fileName<- paste(projet,"-rawdata.txt",sep="")
 		fileName<-paste(dirFile,fileName,sep="/")
-		write.table(dataMA,fileName,col.names=NA,sep="\t",quote=FALSE);
-	
+		if(!file.exists(fileName)){
+			write.table(dataMA,fileName,col.names=NA,sep="\t",quote=FALSE);
+		}
+
 	}else if(typeArray=="NG"){
        
 	files<- dir(path=dirFile,pattern=".*\\.pair$")
@@ -111,9 +118,7 @@ if(import){
 
 
 if(Normalise == "L" | Normalise =="Q"){
-	if(import==FALSE){
 		
-		}
 
 	fd<-paste(projet,"-01-stat-descriptive/",sep="")
 
@@ -121,92 +126,106 @@ if(Normalise == "L" | Normalise =="Q"){
 	##creation du boxplot
 	print("Raw BoxPlot")
 	
-	output_name<-paste(treepath$stat,projet,"-",nom_fichier,"-raw-boxplot.jpeg",sep="")
-	create_boxplot(dataMA,output_name)
-	
+	output_name<-paste(treepath$stat,projet,"-raw-boxplot.jpeg",sep="")
+	if(!file.exists(output_name)){
+		create_boxplot(dataMA,output_name)
+	}
 	##Correlation
 	print("Correlation")
 	cat("** \nCorrelation avant normalisation\n",append=TRUE,file=logNames)
-	output_name = paste(treepath$stat,projet,"-",nom_fichier,"-raw-correlation.jpeg",sep="")
-	echBadCor<-create_correlation_median(dataMA,output_name)
+	output_name = paste(treepath$stat,projet,"-raw-correlation.jpeg",sep="")
+	if(!file.exists(output_name)){
+		echBadCor<-create_correlation_median(dataMA,output_name)
 
-	if(!is.null(echBadCor)){
-		cat("echantillons dont la correlation avec le profil median est <0.8",echBadCor,"\n",append=TRUE,file=logNames)
-	}else{
-		cat("OK\n",append=TRUE,file=logNames)
+		if(!is.null(echBadCor)){
+			cat("echantillons dont la correlation avec le profil median est <0.8",echBadCor,"\n",append=TRUE,file=logNames)
+		}else{
+			cat("OK\n",append=TRUE,file=logNames)
+		}
 	}
-	
 	####NORMALISATION  (LOWESS)##########
 
 	print("Normalisation")
 	#fd<-paste(treepath$normalisation,"/",sep="")
-	if(Normalise == "L"){
-		dataN<-LOWESS(nom_fichier=nom_fichier,data=dataMA,pngDir=treepath$normalisation,profil.median="NA",graph=1,projet=projet)
-	}else if(Normalise =="Q"){
-		dataN<-normQuantile(mat=as.matrix(dataMA),pngDir = treepath$normalisation)
-	}
-	nomFile = paste(treepath$normalisation,projet,"-",nom_fichier, "-normalisation.txt", sep="")
+	nomFile = paste(treepath$normalisation,projet, "-normalisation.txt", sep="")
+	if(!file.exists(nomFile)){
+		if(Normalise == "L"){
+			dataN<-LOWESS(nom_fichier="",data=dataMA,pngDir=treepath$normalisation,profil.median="NA",graph=1,projet=projet)
+		}else if(Normalise =="Q"){
+			dataN<-normQuantile(mat=as.matrix(dataMA),pngDir = treepath$normalisation)
+		}
 
-	write.table(dataN,nomFile,sep="\t",row.names=TRUE, col.names=NA,quote=FALSE)
-	fileName<- paste(treepath$normalisation,projet,"-",nom_fichier,"-normalisationInfo.txt",sep="")
-	tmpinfoGene<-infoGeneAnot[rownames(dataN),]
-	tmpDataMA<-cbind(tmpinfoGene,dataN)
-	write.table(tmpDataMA,fileName,col.names=NA,sep="\t",quote=FALSE,row.names=TRUE);
-	fileName<- paste(treepath$resultatMat,projet,"-",nom_fichier,"-normalisationInfo.txt",sep="")
-	write.table(tmpDataMA,fileName,col.names=NA,sep="\t",quote=FALSE,row.names=TRUE);
-	rm(tmpDataMA)
+		write.table(dataN,nomFile,sep="\t",row.names=TRUE, col.names=NA,quote=FALSE)
+		fileName<- paste(treepath$normalisation,projet,"-normalisationInfo.txt",sep="")
+		tmpinfoGene<-infoGeneAnot[rownames(dataN),]
+		tmpDataMA<-cbind(tmpinfoGene,dataN)
+		write.table(tmpDataMA,fileName,col.names=NA,sep="\t",quote=FALSE,row.names=TRUE);
+		fileName<- paste(treepath$resultatMat,projet,"-normalisationInfo.txt",sep="")
+		write.table(tmpDataMA,fileName,col.names=NA,sep="\t",quote=FALSE,row.names=TRUE);
+		rm(tmpDataMA)
 	
-	fd<-paste(fd,"images/",sep="")
-	imgNames<-paste(treepath$normalisationImage,projet,"-norImg.png",sep="")
+		fd<-paste(fd,"images/",sep="")
+		imgNames<-paste(treepath$normalisationImage,projet,"-norImg.png",sep="")
 
 	#images comprenant tous les plot de normalisation 4 échantillons par image (avant apres avant/apres)
-	print("montage image")
-	montage_cmd<-paste(" montage ",treepath$normalisationImage,"*.png -tile 3x4 -geometry 100% -background none ", imgNames,sep="")
-	print(system.time(try(system(montage_cmd))))
+		print("montage image")
+		montage_cmd<-paste(" montage ",treepath$normalisationImage,"*.png -tile 3x4 -geometry 100% -background none ", imgNames,sep="")
+		print(system.time(try(system(montage_cmd))))
 
-	imgMont<-dir(path=as.character(treepath$normalisationImage),pattern="*-norImg*")
-	filesNorm<-paste(treepath$normalisationImage,imgMont,sep="")
+		imgMont<-dir(path=as.character(treepath$normalisationImage),pattern="*-norImg*")
+		filesNorm<-paste(treepath$normalisationImage,imgMont,sep="")
 	
 #	dataN = read.delim(paste(treepath$normalisation,projet,"-",nom_fichier,"-normalisation.txt",sep=""), sep="\t", header=TRUE, comment.char="",row.names=1)
-	print("Fin Normalisation")
+		tex_norm(projet,filesNorm)
+		print("Fin Normalisation")
 	
-	
+	}	
 	###GRAPHIQUE APRES NORMALISnormalisatioaATION#####
 	##creation du boxplot
 	print("Boxplot Norm")
-	output_name = paste(treepath$normalisationImage,projet,"-",nom_fichier,"-lowess-boxplot.jpeg",sep="")
-	create_boxplot(dataN,output_name)
-	
+	output_name = paste(treepath$normalisationImage,projet,"-lowess-boxplot.jpeg",sep="")
+	if(!file.exists(output_name)){
+		create_boxplot(dataN,output_name)
+	}	
 	#create_stats_des(dataN,output_name,minMax=FALSE)
 	##Correlation apres normalisation
 	print("Correlation Norm")
 	cat("** \nCorrelation apres normalisation\n",append=TRUE,file=logNames)
-	output_name = paste(treepath$normalisationImage,projet,"-",nom_fichier,"-lowess-correlation.jpeg",sep="")
-	echBadCorNorm<-create_correlation_median(dataN,output_name)
+	output_name = paste(treepath$normalisationImage,projet,"-lowess-correlation.jpeg",sep="")
+	if(!file.exists(output_name)){
+		echBadCorNorm<-create_correlation_median(dataN,output_name)
 	
-	if(!is.null(echBadCorNorm)){
-		cat("echantillons dont la correlation avec le profil median est <0.8",echBadCorNorm,"\n",append=TRUE,file=logNames)
-	}else{
-		cat("OK\n",append=TRUE,file=logNames)
+		if(!is.null(echBadCorNorm)){
+			cat("echantillons dont la correlation avec le profil median est <0.8",echBadCorNorm,"\n",append=TRUE,file=logNames)
+		}else{
+			cat("OK\n",append=TRUE,file=logNames)
+		}
 	}
-	
-	print("ecriture rapport preproc")
-	##Génération fichiers TEX stat Descr et corrélation
-	tex_norm(projet,filesNorm)
-	tex_boxplot(projet,nom_fichier)
-	tex_Corre(projet,echBadCor,echBadCorNorm,nom_fichier)
+		print("ecriture rapport preproc")
+		##Génération fichiers TEX stat Descr et corrélation
+		tex_boxplot(projet)
+		tex_Corre(projet,echBadCor,echBadCorNorm)
+
+		save(projet,frameFac,dataN,pData,pSetup,puceInfo,treepath,file=paste(projet,"-dataNorm.Rdata",sep=""))
 	
 }
 
 if(Filtrage==TRUE){
+	if(is.null(dim(frameFac))){
+		annotFilter<-as.factor(as.character(unlist(frameFac)))
+	}else{
+		annotFilter<-as.factor(as.character(unlist(frameFac[filterParam,])))
+	}
+	nbclasses <- nlevels(annotFilter)
 	##############################
 	#creation d'une matrice reduite
 	if (clusteringALEA == TRUE){
+
 		print("matrice aleatoire")
 		nProbes<-nrow(dataN)*(alea/100)
 		sampMatrix<-sampleMatrix(dataN,nProbes)
-		sampleMPrefix=paste(projet,"-03-clusterAleatoire/",projet,"-",nom_fichier,alea,"sample",sep="")
-		sampleMPrefixShort = paste(projet,"-",nom_fichier,alea,"sample",sep="")
+		sampleMPrefix=paste(projet,"-03-clusterAleatoire/",projet,alea,"sample",sep="")
+		sampleMPrefixShort = paste(projet,alea,"sample",sep="")
 		sampleMName<-paste(sampleMPrefix,".txt",sep="")
 		write.table(sampMatrix,sampleMName,quote=FALSE,sep="\t",col.names=NA,row.names=TRUE)
 
@@ -247,8 +266,8 @@ if(Filtrage==TRUE){
 #		sampMatrix<-sampMatrix[nG,]
 	#####################Utilisation de matrix2png pour le clustering de la matrice aleatoire
 	
-		mapName<-paste(substr(projet,1,(nchar(projet) - 7)),"-color.txt",sep="")
-		frameFac<-as.data.frame(frameFac)[,nA]
+		mapName<-paste(projet,"-color.txt",sep="")
+		frameFac<-as.data.frame(frameFac)[,colnames(sampMatrix)]
 		frameFacN<-frameFac
 		frameNames<-paste(projet,"-03-clusterAleatoire/",projet,"-frameFac.txt",sep="")
 		write.table(frameFac,frameNames,sep="\t",row.names=FALSE,quote=FALSE);
@@ -267,12 +286,6 @@ if(Filtrage==TRUE){
 		seuil=mean(med.sample)
 		#annotation du parametre choisi pour le filtrage dans le sens du clustering
 		#Si il n'y a qu'un parametre il faut tester (conflit data.frame et vecteur)
-		if(is.null(dim(frameFac))){
-			annotFilter<-as.factor(as.character(unlist(frameFac)))
-		}else{
-			annotFilter<-as.factor(as.character(unlist(frameFac[filterParam,])))
-		}
-		nbclasses <- nlevels(annotFilter)
 		#filtre<-result_filter(filtrage_non_exprimes(sampMatrix,nbclasses,annotFilter,seuil,nval)
 		#filtre<-as.numeric(result_filter)
 		result_filter<-filtrage_non_exprimes(sampMatrix,nbclasses,annotFilter,seuil,nval)
@@ -297,7 +310,6 @@ if(Filtrage==TRUE){
 	
 	}
 
-		save(projet,frameFacN,dataN,sampMatrix,pData,file=paste(projet,"-dataNorm.Rdata",sep=""))
 	
 	####Filtrage matrice totale
 	print("filtrage matrice totale")
@@ -307,6 +319,11 @@ if(Filtrage==TRUE){
 		dataN<-dataN[,match(colnames(dataN),colnames(frameFac))]
 	}
 	seuil<-mean(apply(dataN,2,median))
+	print(dim(dataN))
+	print(nbclasses)
+	print(annotFilter)
+	print(seuil)
+	print(getNval(pSetup))
 	result_filter=filtrage_non_exprimes(dataN,nbclasses,annotFilter,seuil,nval)
 	
 	
@@ -318,18 +335,26 @@ if(Filtrage==TRUE){
 	cat("\nseuil",seuil,file=logNames,sep="\t",append=TRUE)
 	cat("\nnombre de sonde total",nrow(dataN),file=logNames,sep="\t",append=TRUE)
 	cat("\nnombre de sonde filtree",nrow(m.filtered),file=logNames,sep="\t",append=TRUE)
-	filterMPrefix<-paste(projet,"-04-filtre/",projet,"-matrix-filtree",sep="")
-	filterName<-paste(filterMPrefix,".txt",sep="")
 	
 	
 	
 	#filterName<-paste(projet,"-04-filtre/",projet,"-matrix_filtree.txt",sep="")
-	write.table(m.filtered,filterName,col.names=NA,row.names=TRUE,sep="\t",quote=FALSE)
+	if(clustering == FALSE){
+		filterMPrefix<-paste(treepath$filtre,projet,"-matrix-filtree",sep="")
+		filterName<-paste(filterMPrefix,".txt",sep="")
+		write.table(m.filtered,filterName,col.names=NA,row.names=TRUE,sep="\t",quote=FALSE)
+		filterMPrefix<-paste(treepath$resultat,projet,"-matrix-filtree",sep="")
+		filterName<-paste(filterMPrefix,".txt",sep="")
+		write.table(m.filtered,filterName,col.names=NA,row.names=TRUE,sep="\t",quote=FALSE)
+		save(projet,frameFac,m.filtered,pData,pSetup,puceInfo,treepath,file=paste(projet,"-dataNorm.Rdata",sep=""))
+	}
 }	
 if(clustering==TRUE){	
-	
+	filterMPrefix<-paste(treepath$filtre,projet,"-matrix-filtree",sep="")
+	filterName<-paste(filterMPrefix,".txt",sep="")
 	################Clustering de la matrice totale
 	print("debut clustering matrice totale")
+	write.table(m.filtered,filterName,col.names=NA,row.names=TRUE,sep="\t",quote=FALSE)
 	m.filtered<-clusterEinsen(filterName)
 #	commandCluster<-paste(" cluster -f ",filterName," -l  -cg m -g 1 -e 1  -m c",sep="")
 #	print(system.time(system(commandCluster)))
@@ -355,7 +380,7 @@ if(clustering==TRUE){
 #	nG<-as.character(nG)
 #	m.filtered<-m.filtered[nG,]
 #	frameFacF<-frameFac
-	infocdt<-infoGeneAnot[as.character(row.names(m.filtered,]
+	infocdt<-infoGeneAnot[as.character(row.names(m.filtered)),]
 	newcdt<-cbind(infocdt,m.filtered)
 #	colnames(newcdt)[1]<-"GID"
 	write.table(newcdt,filterNamecdt,sep="\t",row.names=TRUE,quote=FALSE)
@@ -376,19 +401,13 @@ if(clustering==TRUE){
 	system(rotateTree)
 	
 	
-	#system(colorName)
-	if(geneAnnot == TRUE){
 		filterName<-paste(projet,"-04-filtre/",projet,"-matrix_filtreeInfo.txt",sep="")
 		tmpinfoGene<-infoGeneAnot[rownames(m.filtered),]
 		tmpDataMA<-cbind(tmpinfoGene,m.filtered)
 		write.table(tmpDataMA,filterName,col.names=NA,sep="\t",quote=FALSE,row.names=TRUE);
 		rm(tmpDataMA)
 	
-	}
-	
-	if(savingData == TRUE){
-		save(projet,filterParam,m.filtered,frameFac,pData,file=paste(projet,"-dataFilter.Rdata",sep=""))
-	}
+		save(projet,frameFac,m.filtered,pData,pSetup,puceInfo,treepath,file=paste(projet,"-dataFilter.Rdata",sep=""))
 
 
 }
@@ -477,8 +496,9 @@ if(tStat==TRUE){
 		  #-Fold Change 
 		  m1<-meanByFact(m.filtered,frameFac,comparaison[1,i])
 		  m2<-meanByFact(m.filtered,frameFac,comparaison[2,i])
-		  matMean<-cbind(m1,m2)
-		  fc<-apply(matMean,1,FC)
+		  #matMean<-cbind(m1,m2)
+		  fc<-log2(m1/m2)
+		  #fc<-apply(matMean,1,FC)
 			
 		  finalFC<-cbind(finalFC,fc)
 		  colnames(finalFC)[i]<-paste("FC-",versus,sep="")
@@ -572,7 +592,7 @@ if(dCluster==TRUE){
 pathPNG<-paste(projet,"-05-student",sep="")
 pathAnnot<-paste(projet,"-06-annotation",sep="")
 	print(dim(pvalRaw))	
-		graphFile<-clusterAnalyse(mat=m.filtered,info=infoGeneAnot,comparaison=comparaison,f=frameFac,pvalRaw=pvalRaw,pathPNG=pathPNG,pathAnnot=pathAnnot,projet=projet,species=species)
+		graphFile<-clusterAnalyse(mat=m.filtered,info=infoGeneAnot,comparaison=comparaison,f=frameFac,pvalRaw=pvalRaw,pathPNG=pathPNG,pathAnnot=pathAnnot,projet=projet,species=species,seuil=1.5)
 		print(graphFile)
 
 	  	fileMatrix <-paste(projet,"-04-filtre/",projet,"-matrix-filtreeMatrix.png",sep="")

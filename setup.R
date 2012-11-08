@@ -197,6 +197,7 @@ write.table(info,pattern,row.names=FALSE,sep="\t",quote=FALSE)
 verifParam<-function(pSetupFile){
 	
 	CheckError=FALSE
+	nError<-0
 
 	if(!file.exists(pSetupFile)){
 	  stop("Le fichier", pSetupFile," n'est pas present")
@@ -356,11 +357,19 @@ getNormType<-function(pSetup){
 	}
 }
 getNval<-function(pSetup){
-	return(as.numeric(pSetup$nval))
+#Fucking typage dans R!!!!!!
+	return(as.integer(as.character(pSetup$nval)))
 }
 getComparFile<-function(pSetup){
 	return(as.character(pSetup$comparFile))
 }
 getFilterParam<-function(pSetup){
 	return(as.numeric(pSetup$filterParam))
+}
+getAlea<-function(pSetup){
+	if(!is.null(pSetup$alea)){
+		return(as.integer(as.character(pSetup$alea)))
+	}else{
+		return(20)		
+	}	
 }

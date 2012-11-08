@@ -307,8 +307,8 @@ clusterEinsen<-function(f,l=TRUE,cg="m",ng=FALSE,na=FALSE,ca=NULL,u=NULL,g=1,e=1
 	geneNames<-dataClust$NAME[-1:-2]
 	sampleNames<-colnames(dataClust)[which(!is.na(dataClust[2,]))][-1:-2]
 	
-	data<-data[geneNames,]
-	data<-data[,sampleNames]
+	data<-data[as.character(geneNames),]
+	data<-data[,as.character(sampleNames)]
 
 	return(data)
 
