@@ -113,7 +113,7 @@ if(import){
 	}
 
 	tex_importData(typeArray,dye)
-	save(projet,frameFac,dataMA,pData,pSetup,puceInfo,treepath,file=paste(projet,"-dataRaw.Rdata",sep=""))
+	save(projet,frameFac,dataMA,pData,pSetup,puceInfo,treepath,comparaison,infoGeneAnot,file=paste(projet,"-dataRaw.Rdata",sep=""))
 }
 
 
@@ -206,7 +206,7 @@ if(Normalise == "L" | Normalise =="Q"){
 		tex_boxplot(projet)
 		tex_Corre(projet,echBadCor,echBadCorNorm)
 
-		save(projet,frameFac,dataN,pData,pSetup,puceInfo,treepath,file=paste(projet,"-dataNorm.Rdata",sep=""))
+		save(projet,frameFac,dataN,pData,pSetup,puceInfo,treepath,infoGeneAnot,comparaison,file=paste(projet,"-dataNorm.Rdata",sep=""))
 	
 }
 
@@ -346,7 +346,7 @@ if(Filtrage==TRUE){
 		filterMPrefix<-paste(treepath$resultat,projet,"-matrix-filtree",sep="")
 		filterName<-paste(filterMPrefix,".txt",sep="")
 		write.table(m.filtered,filterName,col.names=NA,row.names=TRUE,sep="\t",quote=FALSE)
-		save(projet,frameFac,m.filtered,pData,pSetup,puceInfo,treepath,file=paste(projet,"-dataNorm.Rdata",sep=""))
+		save(projet,frameFac,m.filtered,pData,pSetup,puceInfo,treepath,comparaison,infoGeneAnot,file=paste(projet,"-dataNorm.Rdata",sep=""))
 	}
 }	
 if(clustering==TRUE){	
@@ -407,12 +407,15 @@ if(clustering==TRUE){
 		write.table(tmpDataMA,filterName,col.names=NA,sep="\t",quote=FALSE,row.names=TRUE);
 		rm(tmpDataMA)
 	
-		save(projet,frameFac,m.filtered,pData,pSetup,puceInfo,treepath,file=paste(projet,"-dataFilter.Rdata",sep=""))
+		save(projet,frameFac,m.filtered,pData,pSetup,puceInfo,treepath,comparaison,infoGeneAnot,file=paste(projet,"-dataFilter.Rdata",sep=""))
 
 
 }
 ########test stat
 if(tStat==TRUE){
+	if(clustering == FALSE){
+		load(dir(pattern="*-dataFilter.Rdata"))
+	}
 	print("test stat")
 	finalPV <- NULL
 	finalFC <- NULL
@@ -437,8 +440,6 @@ if(tStat==TRUE){
 		  }
 	  }
 	  #-calcul des Test STAT
-	  cat("\n**Gene Différentiel***\n\n", file=logNames,append=TRUE)
-	  cat("Versus\tpval corrigé < ",seuilPval,"\tup","\tdown","\n", file=logNames,append=TRUE,sep="")
 	
 	  path<-paste(projet,"-05-student",sep="")
 	
@@ -481,7 +482,6 @@ if(tStat==TRUE){
 		  pvalSelectRaw<- subset(result_pvalRaw,result_pvalRaw <= seuilPvalRaw)
 		  
 		  
-		  cat(versus,length(pvalSelect),sep="\t",file=logNames,append=TRUE)
 		  r<-c(versus,length(pvalSelect))	
 		  if(!is.null(pvalSelect))
 			write.table(pvalSelect,file=paste(pathDir,"/",projet,"-",versus,"-",seuilPval,"Adjust.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
@@ -514,9 +514,7 @@ if(tStat==TRUE){
 		  if(is.null(ndown))
 			  ndown<-0
 	
-		  cat("",nup,ndown,"\n",sep="\t",file=logNames,append=TRUE)
 		  r<-c(r,nup,ndown)
-		  cat(length(r), "\n")
 		  if(is.na(tabGenDiff[1,1])){
 		  	tabGenDiff[1,]<-r
 		  }else{
@@ -539,7 +537,6 @@ if(tStat==TRUE){
 			  ndownRaw<-0
 	
 		  rRaw<-c(rRaw,nupRaw,ndownRaw)
-		  cat(length(rRaw), "\n")
 		  if(is.na(tabGenDiffRaw[1,1])){
 		  	tabGenDiffRaw[1,]<-rRaw
 		  }else{
@@ -586,13 +583,22 @@ if(tStat==TRUE){
 					
 	  }
 	
+		save(projet,frameFac,m.filtered,pData,pSetup,puceInfo,treepath,pvalRaw,comparaison,infoGeneAnot,file=paste(projet,"-dataFilter.Rdata",sep=""))
 }
 if(dCluster==TRUE){
 #detection des cluster
-pathPNG<-paste(projet,"-05-student",sep="")
-pathAnnot<-paste(projet,"-06-annotation",sep="")
+	if(tStat == FALSE){
+		load(dir(pattern="*-dataFilter.Rdata"))
+		species<-puceInfo$Species
+		outfileColor<-paste(projet,"-03-clusterAleatoire/",projet,"-colorSample.png",sep="")
+	}
+	ylim<-round(max(abs(-log10(pvalRaw))),0)
+	ylim<-ylim+1
+	pathPNG<-paste(projet,"-05-student",sep="")
+	pathAnnot<-paste(projet,"-06-annotation",sep="")
+	print(projet)
 	print(dim(pvalRaw))	
-		graphFile<-clusterAnalyse(mat=m.filtered,info=infoGeneAnot,comparaison=comparaison,f=frameFac,pvalRaw=pvalRaw,pathPNG=pathPNG,pathAnnot=pathAnnot,projet=projet,species=species,seuil=1.5)
+		graphFile<-clusterAnalyse(mat=m.filtered,info=infoGeneAnot,comparaison=comparaison,f=frameFac,pvalRaw=pvalRaw,pathPNG=pathPNG,pathAnnot=pathAnnot,projet=projet,species=species,seuil=1.5,ylim=ylim)
 		print(graphFile)
 
 	  	fileMatrix <-paste(projet,"-04-filtre/",projet,"-matrix-filtreeMatrix.png",sep="")
@@ -611,12 +617,12 @@ pathAnnot<-paste(projet,"-06-annotation",sep="")
 				appendFirst = TRUE
 			}
 
-			tex_clusterImage(outImage, paste("rapport/graphCluster.tex",sep=""),versus,appendFirst,projet)
-			if(is.null(fileTexCluster)){
-				fileTexCluster<-paste(versus,".tex",sep="")
-			}else{
-				fileTexCluster<-c(fileTexCluster,paste(versus,".tex",sep=""))
-			}
+		#	tex_clusterImage(outImage, paste("rapport/graphCluster.tex",sep=""),versus,appendFirst,projet)
+		#	if(is.null(fileTexCluster)){
+		#		fileTexCluster<-paste(versus,".tex",sep="")
+		#	}else{
+		#		fileTexCluster<-c(fileTexCluster,paste(versus,".tex",sep=""))
+		#	}
 		}
 
 
