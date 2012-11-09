@@ -121,8 +121,7 @@ getInfo<-function(file){
 	}else{
 		message<-paste("Pas de fichier d'annotation défini pour ", design," un fichier à été creer mettre à jour Le package",sep="")
 		info<-createAgilentAnnotation(file)
-		warnings(message)
-		return(info)	
+		stop(message)
 	}
 }
 
@@ -133,7 +132,8 @@ getPuceInfo<-function(design){
 	if(nrow(info) != 0){
 		return(info)
 	}else{
-		return(NULL)	
+		message<-paste("Puce de design", design , "est inexistant")
+		stop(message)	
 	}
 }
 createAgilentAnnotation<-function(file){
@@ -185,7 +185,7 @@ if(!is.null(tmp$Description ))
 	colnames(info)[ncol(info)]<-"Description"
 
 madId<-paste(tmp$FeatureNum,"//",tmp$GeneName,sep="")
-rownames(info)<-madId
+info<-cbind(madId,info)
 pattern<-getPattern(file)
 write.table(info,pattern,row.names=FALSE,sep="\t",quote=FALSE)
 
