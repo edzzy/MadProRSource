@@ -6,6 +6,7 @@ coords<-locator(type="l",col=1)
 h<-lm(coords$y ~ coords$x)
 b<-h$coefficients[1]
 a<-h$coefficients[2]
+indexcol<-rep(1,length(x))
 tmp<-which( x > coords$x[1] & x < coords$x[2] & y > a*x + b )
 indexcol<-replace(indexcol,tmp,2)
 selectProbe<-y[tmp]

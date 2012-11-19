@@ -358,9 +358,9 @@ if(clustering==TRUE){
 	m.filtered<-clusterEinsen(filterName)
 #	commandCluster<-paste(" cluster -f ",filterName," -l  -cg m -g 1 -e 1  -m c",sep="")
 #	print(system.time(system(commandCluster)))
-	
+		
 	print("fin clustering matrice totale")
-
+	frameFac<-frameFac[,colnames(m.filtered)]
 	commandSlcviewMatrix<-paste("slcview.pl ",filterMPrefix,".cdt -xsize 25 -height 1300 -genelabel 0 -gtrresolution 0 -arraylabels 0 -atrresolution 0 -o ",filterMPrefix,"Matrix.png" ,sep="" )
 		
 	print(system.time(system(commandSlcviewMatrix)))
@@ -586,23 +586,26 @@ if(tStat==TRUE){
 		save(projet,frameFac,m.filtered,pData,pSetup,puceInfo,treepath,pvalRaw,comparaison,infoGeneAnot,file=paste(projet,"-dataFilter.Rdata",sep=""))
 }
 if(dCluster==TRUE){
+	seuilPic =2 
 #detection des cluster
 	if(tStat == FALSE){
 		load(dir(pattern="*-dataFilter.Rdata"))
 		species<-puceInfo$Species
 		outfileColor<-paste(projet,"-03-clusterAleatoire/",projet,"-colorSample.png",sep="")
 	}
+	species<-puceInfo$Species
 	ylim<-round(max(abs(-log10(pvalRaw))),0)
 	ylim<-ylim+1
 	pathPNG<-paste(projet,"-05-student",sep="")
 	pathAnnot<-paste(projet,"-06-annotation",sep="")
 	print(projet)
 	print(dim(pvalRaw))	
-		graphFile<-clusterAnalyse(mat=m.filtered,info=infoGeneAnot,comparaison=comparaison,f=frameFac,pvalRaw=pvalRaw,pathPNG=pathPNG,pathAnnot=pathAnnot,projet=projet,species=species,seuil=1.5,ylim=ylim)
+		graphFile<-clusterAnalyse(mat=m.filtered,info=infoGeneAnot,comparaison=comparaison,f=frameFac,pvalRaw=pvalRaw,pathPNG=pathPNG,pathAnnot=pathAnnot,projet=projet,species=species,seuil=seuilPic,ylim=ylim)
 		print(graphFile)
 
 	  	fileMatrix <-paste(projet,"-04-filtre/",projet,"-matrix-filtreeMatrix.png",sep="")
 	  	fileTree <- paste(projet,"-04-filtre/atr.",projet,"-matrix-filtreeArray.png",sep="")
+	  fileTexCluster<-NULL
 
 		for(i in 1:length(graphFile)){
 
@@ -617,12 +620,12 @@ if(dCluster==TRUE){
 				appendFirst = TRUE
 			}
 
-		#	tex_clusterImage(outImage, paste("rapport/graphCluster.tex",sep=""),versus,appendFirst,projet)
-		#	if(is.null(fileTexCluster)){
-		#		fileTexCluster<-paste(versus,".tex",sep="")
-		#	}else{
-		#		fileTexCluster<-c(fileTexCluster,paste(versus,".tex",sep=""))
-		#	}
+			tex_clusterImage(outImage, paste("rapport/graphCluster.tex",sep=""),versus,appendFirst,projet)
+			if(is.null(fileTexCluster)){
+				fileTexCluster<-paste(versus,".tex",sep="")
+			}else{
+				fileTexCluster<-c(fileTexCluster,paste(versus,".tex",sep=""))
+			}
 		}
 
 

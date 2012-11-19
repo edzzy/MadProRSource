@@ -93,6 +93,7 @@ clusterAnalyse<-function(mat,comparaison,f,pvalRaw,info,pathPNG="./",pathAnnot="
 		#Graph cluster
 	}
 	out_name<-paste(pathPNG,"/",projet,prefixName,".png",sep="")
+	out_name2<-paste(pathPNG,"/",projet,prefixName,"2.png",sep="")
 	graphFile<-c(graphFile,out_name)	
 
 	f<-as.matrix(f)
@@ -102,12 +103,13 @@ clusterAnalyse<-function(mat,comparaison,f,pvalRaw,info,pathPNG="./",pathAnnot="
 	logFC<-log2(m1/m2)
 	value<-sign(logFC) * -log10(pvalRaw[,i])
 #	value<-apply(tabmean,1,graphClustPval)
-	if(is.null(coord)){
+	if(is.null(selectCoord)){
 		selectCoord<-0	
 		coord<-0
 	}
 	
-		graphMmobile(filename=out_name,value=value,seuil=seuil,clust=coord,ylim=ylim)
+		graphMmobile(filename=out_name,value=value,seuil=seuil,clust=selectCoord,ylim=ylim)
+		graphMmobile(filename=out_name2,value=value,seuil=seuil,clust=coord,ylim=ylim)
 	}
 
 	return(graphFile)
@@ -213,7 +215,7 @@ fusionCluster<-function(begin,end){
 		x<-seq(b1:e1) + b1 - 1
 		y<-seq(b2:e2) + b2 - 1
 		interXY<-intersect(x,y)  
-		if(length(interXY) == 0){
+		if(b2 - e1 > 100 ){
 			finaleBegin<-c(finaleBegin,b1)
 			finaleEnd<-c(finaleEnd,e1)
 			begin<-begin[-1]

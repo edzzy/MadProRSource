@@ -21,6 +21,7 @@ function(pData,namesGenes,type="AG",pathDir=""){
               Les colonnes GeneID et FeatureNum seront utilisees par defaut")
   
 	dye<-length(unique(pData$Dye))
+	print(dye)
 
 	#Setup des arguments pour la creation de la matrice.
 	# type de puce et noms des colones a extraire.
@@ -52,28 +53,49 @@ function(pData,namesGenes,type="AG",pathDir=""){
 	if ( dye == 2 && (type == "AG" || type == "GPR" ) ){
 		namesEch<-c(rownames(pData)[which(tolower(pData$Dye) == "cy5")],
                 rownames(pData)[which(tolower(pData$Dye) == "cy3")])
+		print(namesEch)
     
 	}else {
 		namesEch<-rownames(pData)
 	}
 
+
 	#Lecture des fichiers pour creer un objet expressionArray. (limma)
 	RG<-read.maimages(unique(pData$nomFichiers),source=source,columns=cols,other.columns=other.col,path=pathDir)
 
 		if(dye == 2){
+			print( " OK dye 2")
       pDataCy5<-pData[which(tolower(pData$Dye)== "cy5"),]
+	  print("Cy5")
+	  print(pDataCy5)
       pDataCy3<-pData[which(tolower(pData$Dye)== "cy3"),]
+	  print("Cy3")
+	  print(pDataCy3)
       R<-RG$R
       G<-RG$G
-      
+	  print("R")
+     print(colnames(R)) 
+	  print("G")
+     print(colnames(G)) 
       R<-R[,intersect(removeExt(pDataCy5$nomFichiers),colnames(R))]
       G<-G[,intersect(removeExt(pDataCy3$nomFichiers),colnames(G))]
+	  print("R")
+     print(colnames(R)) 
+	  print("G")
+     print(colnames(G)) 
 
 			data<-cbind(R,G)
+	print(dim(data))
+			
 		}else {
+			print ("dye 1")
 			data<-RG$G
 		}
 	#nom des echantillons
+	print(dim(data))
+	
+	print(length(namesEch))
+	print(namesEch)
 	colnames(data)<-namesEch
 	#noms des genes
 	rownames(data)<-namesGenes
