@@ -43,7 +43,7 @@ if(!file.exists(dirA))
 treepath<-cbind(treepath,dirA)
 colnames(treepath)[ncol(treepath)]<-"annotation"
 
-dirA<-"rapport/"
+dirA<-paste("./",p,"-rapport",sep="")
 if(!file.exists(dirA))
   dir.create(dirA)
 treepath<-cbind(treepath,dirA)
@@ -110,7 +110,15 @@ getPattern<-function(file){
 	return(as.character(pattern))
 	
 }
-
+cpRapport<-function(treepath){
+	if(file.exists(as.character(treepath$rapport))){
+		packagePath<-system.file("extdata/rapport",package="MadProDev")
+		files<-dir(path=packagePath)
+		files<-paste(packagePath,files,sep="/")
+		directory<-paste(treepath$rapport,"/",sep="")
+		file.copy(files,directory)
+	}
+}
 getInfo<-function(file){
 
 	design<-getPattern(file)
@@ -136,6 +144,7 @@ getPuceInfo<-function(design){
 		stop(message)	
 	}
 }
+
 createAgilentAnnotation<-function(file){
 	info<-data.frame()
 	if(!file.exists(file)){

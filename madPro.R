@@ -31,6 +31,9 @@ if(import){
 	cat("\nProjet : ",projet,append=TRUE)
 	cat("\nSetup  OK",append=TRUE)
 	rapportName<-paste(projet,"-rapport.tex",sep="")
+	treepath<-create_pathway(projet)
+	treepath<-as.data.frame(treepath)
+	cpRapport(treepath)
 	command<-paste("mv rapport/rapport.tex rapport/",rapportName,sep="")
 
 	system(command)
@@ -49,8 +52,6 @@ if(import){
 	print("Debut annotation puce")
 	namesFiles<-pData$nomFichiers
 
-	treepath<-create_pathway(projet)
-	treepath<-as.data.frame(treepath)
 
 	# on lit la matrice
 	if(typeArray == "GPR"){
