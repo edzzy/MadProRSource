@@ -34,86 +34,90 @@ tex_clusterImage<-function(fileCluster,tex_file,versus,appendFirst,projet){
 
 
 
-tex_Corre<-function(projet,echBadCor,echBadCorNorm){
+tex_Corre<-function(projet,echBadCor,echBadCorNorm,dirName="."){
+
+	fileName<-paste(dirName,"/graphCorrelation.tex",sep="")
   
 	cat("\\begin{figure}[H]\n                                                                                                 
     \\centering\n
-    \\begin{tabular}{cc}\n",file="rapport/graphCorrelation.tex",append=FALSE)
+    \\begin{tabular}{cc}\n",file=fileName,append=FALSE)
      include1=paste("\\includegraphics[scale=0.20]{../",projet,"-01-stat-descriptive/",projet,"-raw-correlation.jpeg} &\n",sep="")
     include2=paste("\\includegraphics[scale=0.20]{../",projet,"-02-normalisation/images/",projet,"-lowess-correlation.jpeg} \\\\\n",sep="")
-     cat(include1,include2,file="rapport/graphCorrelation.tex",append=TRUE)
+     cat(include1,include2,file=fileName,append=TRUE)
      cat("(a) & (b) \\\\\n
     \\end{tabular}\n
         \\caption{\\label{Correlation}Corrélation de chaque échantillon par rapport au profil médian avant (a) et après (b) normalisation}\n
-\\end{figure}\n", file="rapport/graphCorrelation.tex",append=TRUE)
+\\end{figure}\n", file=fileName,append=TRUE)
   
   if(length(echBadCor)!=0){
-    cat("Echantillons dont la corrélation est inférieur à 0.8 avant la normalisation :\n",file="rapport/graphCorrelation.tex",append=TRUE)
-    cat("\\begin{itemize}\n",file="rapport/graphCorrelation.tex",append=TRUE)
+    cat("Echantillons dont la corrélation est inférieur à 0.8 avant la normalisation :\n",file=fileName,append=TRUE)
+    cat("\\begin{itemize}\n",file=fileName,append=TRUE)
     for(i in 1:length(echBadCor)){
-      cat("\\item ",echBadCor[i], "\n",file="rapport/graphCorrelation.tex",append=TRUE)
+      cat("\\item ",echBadCor[i], "\n",file=fileName,append=TRUE)
     }
-    cat("\\end{itemize}\n",file="rapport/graphCorrelation.tex",append=TRUE)
+    cat("\\end{itemize}\n",file=fileName,append=TRUE)
   }else{
-    cat("Les échantillons avant Normalisation ont une bonne corrélation avec le profil médian \\\\\n" ,file="rapport/graphCorrelation.tex",append=TRUE)
+    cat("Les échantillons avant Normalisation ont une bonne corrélation avec le profil médian \\\\\n" ,file=fileName,append=TRUE)
   }
   
   if(length(echBadCorNorm)!=0){
-    cat("Echantillons dont la corrélation est inférieur à 0.8 après la normalisation : \n",file="rapport/graphCorrelation.tex",append=TRUE)
-    cat("\\begin{itemize}\n",file="rapport/graphCorrelation.tex",append=TRUE)
+    cat("Echantillons dont la corrélation est inférieur à 0.8 après la normalisation : \n",file=fileName,append=TRUE)
+    cat("\\begin{itemize}\n",file=fileName,append=TRUE)
     for(i in 1:length(echBadCorNorm)){
-      cat("\\item ",echBadCorNorm[i],"\n", file="rapport/graphCorrelation.tex",append=TRUE)
+      cat("\\item ",echBadCorNorm[i],"\n", file=fileName,append=TRUE)
     }
-    cat("\\end{itemize}\n",file="rapport/graphCorrelation.tex",append=TRUE)
+    cat("\\end{itemize}\n",file=fileName,append=TRUE)
     }else{
-      cat("Les échantillons après Normalisation ont une bonne corrélation avec le profil médian \\\\\n", file="rapport/graphCorrelation.tex",append=TRUE)
+      cat("Les échantillons après Normalisation ont une bonne corrélation avec le profil médian \\\\\n", file=fileName,append=TRUE)
     }
 }
 
 
 
-tex_filtrage<-function(projet,annotFilter,seuil,initialProbe,conserveProbe, nval){
+tex_filtrage<-function(projet,annotFilter,seuil,initialProbe,conserveProbe, nval,dirName="."){
+	fileName<-paste(dirName,"/filtrage.tex",sep="")
   
-  cat("\\begin{description}\n",file="rapport/filtrage.tex",append=FALSE)
+  cat("\\begin{description}\n",file=fileName,append=FALSE)
   textSeuil<-paste("\\item [seuil : ]moyenne de la médiane des échantillons. Pour l'étude le seuil est de : ", seuil,sep="")
-  cat(textSeuil,file="rapport/filtrage.tex",append=TRUE)
+  cat(textSeuil,file=fileName,append=TRUE)
   filtreRule<-paste("\\item[Règles de filtrage : ] \n
                     \\begin{itemize} \n
                     \\item Le filtrage est effecué sur les ", nlevels(annotFilter), "classes suivantes\n")
-                    cat(filtreRule,file="rapport/filtrage.tex",append=TRUE)
-                    cat("\\begin{itemize}\n",file="rapport/filtrage.tex",append=TRUE)
+                    cat(filtreRule,file=fileName,append=TRUE)
+                    cat("\\begin{itemize}\n",file=fileName,append=TRUE)
                       for (i in 1:nlevels(annotFilter)){
     
                         classe<-paste("\\item ", levels(annotFilter)[i],"\n",sep="")
-                        cat(classe,file="rapport/filtrage.tex",append=TRUE)
+                        cat(classe,file=fileName,append=TRUE)
     
                       }
-                    cat("\\end{itemize}\n",file="rapport/filtrage.tex",append=TRUE)
+                    cat("\\end{itemize}\n",file=fileName,append=TRUE)
                     r2<-paste("\\item une sonde est conservée si au moins ",nval," \\% des échantillons d'une classe passe le seuil\n",sep="")
                 nbSonde<-paste("\\item Nombre de sonde conservées dans l'analyse : ",conserveProbe, " sur ", initialProbe,"\n",sep="")
-         cat(r2,file="rapport/filtrage.tex",append=TRUE)
-        cat(nbSonde,file="rapport/filtrage.tex",append=TRUE)             
-  cat("\\end{itemize}\n",file="rapport/filtrage.tex",append=TRUE)
-  cat("\\end{description}\n",file="rapport/filtrage.tex",append=TRUE)
+         cat(r2,file=fileName,append=TRUE)
+        cat(nbSonde,file=fileName,append=TRUE)             
+  cat("\\end{itemize}\n",file=fileName,append=TRUE)
+  cat("\\end{description}\n",file=fileName,append=TRUE)
   
   cat("\\begin{figure}[H]\n
   	\\centering\n
   	\\begin{tabular}{c}\n
-  	",file="rapport/filtrage.tex",append=TRUE)
+  	",file=fileName,append=TRUE)
     
   	clusterFile<-paste("\\includegraphics[scale=0.20]{../",projet,"-03-clusterAleatoire/",projet,"-filtrageCluster.png} \\\\\n",sep="")
   	clusterLegend<-paste("\\includegraphics[scale=0.20]{../",projet,"-03-clusterAleatoire/Legende-",projet,"-colorSample.png}\\\\\n",sep="")
 	clusterTree<-paste("\\includegraphics[scale=0.20]{../",projet,"-03-clusterAleatoire/",projet,"-TreeArraycolor.png} \\\\\n",sep="")  
   
-  cat(clusterFile,clusterLegend,clusterTree,file="rapport/filtrage.tex",append=TRUE)
+  cat(clusterFile,clusterLegend,clusterTree,file=fileName,append=TRUE)
   cat("\\end{tabular}\n
   	\\end{figure}\n
-  	",file="rapport/filtrage.tex",append=TRUE)
+  	",file=fileName,append=TRUE)
 }
 
 
 
-tex_genDiff<-function(tabGenDiff,projet,fileName="rapport/genDiff.tex"){
+tex_genDiff<-function(tabGenDiff,projet,dirName=".",file="genDiff.tex"){
+	fileName<-paste(dirName,"/",file,sep="")
 	
 	header<-paste(colnames(tabGenDiff)[1:3]," & ", sep="")
 	header<-c(header, colnames(tabGenDiff)[4], " \\\\ \n \\hline\n")
@@ -146,8 +150,8 @@ tex_genDiff<-function(tabGenDiff,projet,fileName="rapport/genDiff.tex"){
 }
 
 
-tex_importData<-function(typeArray,dye){
-  
+tex_importData<-function(typeArray,dye,dirName="."){
+ fileName<-paste(dirName,"/importData.tex",sep="") 
 	puce<-NULL
 	color<-NULL
 	scan<-NULL
@@ -204,7 +208,7 @@ tex_importData<-function(typeArray,dye){
 				\\par\n",sep="")
 
 
-	cat(paragraphe,file="rapport/importData.tex",append=FALSE)
+	cat(paragraphe,file=fileName,append=FALSE)
 
 
 }
@@ -212,10 +216,12 @@ tex_importData<-function(typeArray,dye){
 
 
 
-tex_norm<-function(projet,filesNorm){
-  
+tex_norm<-function(projet,filesNorm,dirName="."){
+
+ fileName<-paste(dirName,"/graphNorm.tex",sep="") 
+
   cat("\\setlongtables\n
-    \\begin{longtable}{cc}\n", file = "rapport/graphNorm.tex",append=FALSE)
+    \\begin{longtable}{cc}\n", file = fileName,append=FALSE)
   include<-"\\includegraphics[scale=0.15]{"
   carac<-"}& \n"
   for(i in 1:length(filesNorm)){
@@ -225,12 +231,12 @@ tex_norm<-function(projet,filesNorm){
         carac<-"} &\n"      
       }
       includeTex<-paste(include,"../",filesNorm[i],carac,sep="")
-      cat(includeTex,file="rapport/graphNorm.tex",append=TRUE)
+      cat(includeTex,file=fileName,append=TRUE)
     }
   cat("
         \\caption{\\label{Norm}Graphiques des distributions des échantillons avant et après normalisation contre le profil médian et graphique des distribution avant/après d'un même échantillon}\n
 \\end{longtable}\n",
-  file="rapport/graphNorm.tex", append=TRUE)
+  file=fileName, append=TRUE)
 }
 
 
@@ -247,32 +253,36 @@ tex_question<-function(vectFile,texFile){
 	
 }
 
-tex_StatDesc<-function(projet){
-  cat("\\begin{figure}[H]\n
+tex_StatDesc<-function(projet,dirName="."){
+
+	fileName=paste(dirName,"/graphStatDesc.tex",sep="")
+
+	cat("\\begin{figure}[H]\n
     \\centering\n
-    \\begin{tabular}{cc}\n", file = "rapport/graphStatDesc.tex")
+    \\begin{tabular}{cc}\n", file = fileName)
       include1<-paste("\\includegraphics[scale=0.20]{../",projet,"-01-stat-descriptive/",projet,"-raw-statClient} &\n",sep="")
       include2<-paste("\\includegraphics[scale=0.20]{../",projet,"-02-normalisation/images/",projet,"-lowess-statClient.jpeg} \\\\\n",sep="")
-      cat(include1, include2,file="rapport/graphStatDesc.tex", append=TRUE) 
+      cat(include1, include2,file=fileName, append=TRUE) 
         cat("(a) & (b) \\\\\n 
     \\end{tabular}\n
         \\caption{\\label{statDes}Statistiques descriptives avant (a) et après (b) normalisation}\n
 \\end{figure}\n",
-  file="rapport/graphStatDesc.tex", append=TRUE)
+  file=fileName, append=TRUE)
 }
 
-tex_boxplot<-function(projet=""){
+tex_boxplot<-function(projet="",dirName="."){
+	fileName=paste(dirName,"/graphStatDesc.tex",sep="")
   cat("\\begin{figure}[H]\n
     \\centering\n
-    \\begin{tabular}{cc}\n", file = "rapport/graphStatDesc.tex")
-      include1<-paste("\\includegraphics[scale=0.20]{../",projet,"-01-stat-descriptive/",projet,"-","-raw-boxplot} &\n",sep="")
+    \\begin{tabular}{cc}\n", file = fileName)
+      include1<-paste("\\includegraphics[scale=0.20]{../",projet,"-01-stat-descriptive/",projet,"-raw-boxplot} &\n",sep="")
       include2<-paste("\\includegraphics[scale=0.20]{../",projet,"-02-normalisation/images/",projet,"-lowess-boxplot.jpeg} \\\\\n",sep="")
-      cat(include1, include2,file="rapport/graphStatDesc.tex", append=TRUE) 
+      cat(include1, include2,file=fileName, append=TRUE) 
         cat("(a) & (b) \\\\\n 
     \\end{tabular}\n
         \\caption{\\label{statDes}Statistiques descriptives avant (a) et après (b) normalisation}\n
 \\end{figure}\n",
-  file="rapport/graphStatDesc.tex", append=TRUE)
+  file=fileName, append=TRUE)
 }
 
 tex_tab2tex<-function(fileGominer,fileName,title,n=10,append=TRUE){

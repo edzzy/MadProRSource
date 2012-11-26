@@ -26,68 +26,68 @@ clusterAnalyse<-function(mat,comparaison,f,pvalRaw,info,pathPNG="./",pathAnnot="
 			fileList<-paste(pathAnnot,"/",prefixName,"/list.txt",sep="")
 			resultDir<-paste(pathAnnot,"/",prefixName,"/resultat",sep="")
 
-	if(file.exists(fileList)){
-		commandAnnotation<-paste("gominer -p ",filePuce," -f ",fileList, " -s ", species, " -r ", resultDir,sep="")
-		system(commandAnnotation)
-	#Evaluation
-		clust<-1
-		filesSfdr<-dir(path=resultDir, pattern="^S_*")
-		gceName<-dir(path=resultDir,pattern="*gce*")
-		Ename<-dir(path=resultDir, pattern="^E_*")
-		GominerF=dir(path=resultDir, pattern="^[^E|S].*_fdrse")
+			if(file.exists(fileList)){
+				commandAnnotation<-paste("gominer -p ",filePuce," -f ",fileList, " -s ", species, " -r ", resultDir,sep="")
+				system(commandAnnotation)
+				#Evaluation
+				clust<-1
+				filesSfdr<-dir(path=resultDir, pattern="^S_*")
+				gceName<-dir(path=resultDir,pattern="*gce*")
+				Ename<-dir(path=resultDir, pattern="^E_*")
+				GominerF=dir(path=resultDir, pattern="^[^E|S].*_fdrse")
 	
-		for (j in 1:length(filesSfdr)){
-			if(nrow(read.delim(paste(resultDir,filesSfdr[j],sep="/"))) !=0){
+				for (j in 1:length(filesSfdr)){
+					if(nrow(read.delim(paste(resultDir,filesSfdr[j],sep="/"))) !=0){
+						rapportDir<-paste(prefixname,"-rapport",sep="")
+						fileNamesGominer<-paste(rapportDir,"/AnnotationCluster.tex",sep="")
+						if(!file.exists(rapportDir)){
+							dir.create(rapportDir)
+						}
 
-				fileNamesGominer<-"rapport/AnnotationCluster.tex"
-				if(!file.exists("rapport")){
-					dir.create("rapport")
+						tmpFile<-paste(resultDir,"/",filesSfdr[j],sep="")
+
+						title<-sub("S_(.*)_(\\d*)\\.txt.*fdrse.txt","\\1 : Cluster ",filesSfdr[j])
+						title<-paste(title,clust,sep="")
+
+						tmpFdrName<-sub("S_(.*)_(\\d*)\\.txt.*fdrse.txt","S_\\1",filesSfdr[j])
+						tmpFdrName<-paste(tmpFdrName,"_",clust,".fdr.tsv",sep="")
+
+						tmpGceName<-sub("(.*)_(\\d*)\\.txt.*gce.txt","\\1",gceName[j])
+						tmpGceName<-paste(tmpGceName,"_",clust,".gce.tsv",sep="")
+
+						EnameTmp<-sub("E_(.*)_(\\d*)\\.txt.*fdrse.txt","E_\\1",Ename[j])
+						EnameTmp<-paste(EnameTmp,"_",clust,".fdr.tsv",sep="")
+
+						gName<-paste(resultDir,GominerF,sep="/")
+						file.remove(gName)
+
+
+						#repertoire annotation question
+						pathComp<-paste(pathAnnot,"/",prefixName,sep="")
+						#Nom du fichier contenant la liste des gnènes
+						prefix<-sub("S_(.*)_\\d*\\.txt.*fdrse.txt","\\1",filesSfdr[j])
+
+
+						fileListCluster<-paste(pathComp,"/",prefix,"_",j,".txt",sep="")
+						newFileListCluster<-paste(pathComp,"/",prefix,"_",clust,".txt",sep="")
+						file.rename(fileListCluster,newFileListCluster)
+
+						file.rename(paste(resultDir,filesSfdr[j],sep="/"),paste(resultDir,tmpFdrName,sep="/"))
+						file.rename(paste(resultDir,gceName[j],sep="/"),paste(resultDir,tmpGceName,sep="/"))
+						file.rename(paste(resultDir,Ename[j],sep="/"),paste(resultDir,EnameTmp,sep="/"))
+
+						tex_tab2tex(paste(resultDir,tmpFdrName,sep="/"),fileNamesGominer,title=title)
+
+						clust<-clust+1
+						selectCoord<-rbind(selectCoord,coord[j,])
+
+
+				}else{
+					prefix<-sub("S_(.*)(_\\d*)\\.txt.*fdrse.txt","\\1\\2",filesSfdr[j])
+					files2remove<-dir(path=resultDir,pattern=prefix)
+					files2remove<-paste(resultDir,files2remove,sep="/")
+					file.remove(files2remove)
 				}
-
-				tmpFile<-paste(resultDir,"/",filesSfdr[j],sep="")
-
-				title<-sub("S_(.*)_(\\d*)\\.txt.*fdrse.txt","\\1 : Cluster ",filesSfdr[j])
-				title<-paste(title,clust,sep="")
-
-				tmpFdrName<-sub("S_(.*)_(\\d*)\\.txt.*fdrse.txt","S_\\1",filesSfdr[j])
-				tmpFdrName<-paste(tmpFdrName,"_",clust,".fdr.tsv",sep="")
-
-				tmpGceName<-sub("(.*)_(\\d*)\\.txt.*gce.txt","\\1",gceName[j])
-				tmpGceName<-paste(tmpGceName,"_",clust,".gce.tsv",sep="")
-
-				EnameTmp<-sub("E_(.*)_(\\d*)\\.txt.*fdrse.txt","E_\\1",Ename[j])
-				EnameTmp<-paste(EnameTmp,"_",clust,".fdr.tsv",sep="")
-
-				gName<-paste(resultDir,GominerF,sep="/")
-				file.remove(gName)
-
-
-				#repertoire annotation question
-				pathComp<-paste(pathAnnot,"/",prefixName,sep="")
-				#Nom du fichier contenant la liste des gnènes
-				prefix<-sub("S_(.*)_\\d*\\.txt.*fdrse.txt","\\1",filesSfdr[j])
-
-
-				fileListCluster<-paste(pathComp,"/",prefix,"_",j,".txt",sep="")
-				newFileListCluster<-paste(pathComp,"/",prefix,"_",clust,".txt",sep="")
-				file.rename(fileListCluster,newFileListCluster)
-
-				file.rename(paste(resultDir,filesSfdr[j],sep="/"),paste(resultDir,tmpFdrName,sep="/"))
-				file.rename(paste(resultDir,gceName[j],sep="/"),paste(resultDir,tmpGceName,sep="/"))
-				file.rename(paste(resultDir,Ename[j],sep="/"),paste(resultDir,EnameTmp,sep="/"))
-
-				tex_tab2tex(paste(resultDir,tmpFdrName,sep="/"),fileNamesGominer,title=title)
-
-				clust<-clust+1
-				selectCoord<-rbind(selectCoord,coord[j,])
-
-
-		}else{
-			prefix<-sub("S_(.*)(_\\d*)\\.txt.*fdrse.txt","\\1\\2",filesSfdr[j])
-			files2remove<-dir(path=resultDir,pattern=prefix)
-			files2remove<-paste(resultDir,files2remove,sep="/")
-			file.remove(files2remove)
-		}
 	}
 }
 		#Graph cluster

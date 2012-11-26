@@ -34,7 +34,7 @@ if(import){
 	treepath<-create_pathway(projet)
 	treepath<-as.data.frame(treepath)
 	cpRapport(treepath)
-	command<-paste("mv rapport/rapport.tex rapport/",rapportName,sep="")
+	command<-paste("mv ",treepath$rapport,"/rapport.tex ,",treepath$rapport,"/",rapportName,sep="")
 
 	system(command)
 	if(!file.exists(fileEch))
@@ -113,7 +113,7 @@ if(import){
 		read_NG(namesEch,files)
 	}
 
-	tex_importData(typeArray,dye)
+	tex_importData(typeArray,dye,dirName=treepath$rapport)
 	save(projet,frameFac,dataMA,pData,pSetup,puceInfo,treepath,comparaison,infoGeneAnot,file=paste(projet,"-dataRaw.Rdata",sep=""))
 }
 
@@ -177,7 +177,7 @@ if(Normalise == "L" | Normalise =="Q"){
 		filesNorm<-paste(treepath$normalisationImage,imgMont,sep="")
 	
 #	dataN = read.delim(paste(treepath$normalisation,projet,"-",nom_fichier,"-normalisation.txt",sep=""), sep="\t", header=TRUE, comment.char="",row.names=1)
-		tex_norm(projet,filesNorm)
+		tex_norm(projet,filesNorm,dirName=treepath$rapport)
 		print("Fin Normalisation")
 	
 	}	
@@ -204,8 +204,8 @@ if(Normalise == "L" | Normalise =="Q"){
 	}
 		print("ecriture rapport preproc")
 		##Génération fichiers TEX stat Descr et corrélation
-		tex_boxplot(projet)
-		tex_Corre(projet,echBadCor,echBadCorNorm)
+		tex_boxplot(projet,dirName=treepath$rapport)
+		tex_Corre(projet,echBadCor,echBadCorNorm,dirName=treepath$rapport)
 
 		save(projet,frameFac,dataN,pData,pSetup,puceInfo,treepath,infoGeneAnot,comparaison,file=paste(projet,"-dataNorm.Rdata",sep=""))
 	
@@ -330,7 +330,7 @@ if(Filtrage==TRUE){
 	
 	m.filtered=dataN[result_filter == TRUE,]
 	
-	tex_filtrage(projet,annotFilter,seuil,nrow(dataN),nrow(m.filtered),nval)
+	tex_filtrage(projet,annotFilter,seuil,nrow(dataN),nrow(m.filtered),nval,dirName=treepath$rapport)
 	
 	
 	cat("\nseuil",seuil,file=logNames,sep="\t",append=TRUE)
@@ -373,20 +373,31 @@ if(clustering==TRUE){
 		
 	
 	
-	filterNamecdt<-paste(projet,"-04-filtre/",projet,"-matrix-filtree.cdt",sep="")
-#	matcdt<-read.delim(filterNamecdt,sep="\t")
+
 #	#ordonne la matrice normalisé filtre selon le cdt
 #	nG<-as.vector(matcdt[,2])
 #	nG<-nG[-1:-2]
 #	nG<-as.character(nG)
 #	m.filtered<-m.filtered[nG,]
 #	frameFacF<-frameFac
-	infocdt<-infoGeneAnot[as.character(row.names(m.filtered)),]
-	newcdt<-cbind(infocdt,m.filtered)
+
+	info<-infoGeneAnot[as.character(row.names(m.filtered)),]
+	newMat<-cbind(info,m.filtered)
 #	colnames(newcdt)[1]<-"GID"
-	write.table(newcdt,filterNamecdt,sep="\t",row.names=TRUE,quote=FALSE)
-	 rm(newcdt)
-	 rm(matcdt)
+	write.table(newMat,filterName,sep="\t",row.names=TRUE,quote=FALSE)
+
+	filterNamecdt<-paste(treepath$filtre,"/",projet,"-matrix-filtree.cdt",sep="")
+	newcdt<-read.delim(filterNamecdt,sep="\t")
+	tmpvec<-rep("",ncol(info))
+
+	infocdt<-rbind(tmpvec,tmpvec,info)
+
+	newcdt<-cbind(newcdt[,1],infocdt,newcdt[,-1])
+	colnames(newcdt)[1]<-"GID"
+	write.table(newcdt,filterNamecdt,row.names=FALSE,quote=FALSE,sep="\t")
+	rm(newcdt)
+	rm(matcdt)
+	rm(infocdt)
 	
 	########Utilisation de matrix2png pour visualation des parametres
 	frameNames<-paste(projet,"-04-filtre/",projet,"-frameFacF.txt",sep="")
@@ -593,19 +604,18 @@ if(dCluster==TRUE){
 		load(dir(pattern="*-dataFilter.Rdata"))
 		species<-puceInfo$Species
 		outfileColor<-paste(projet,"-03-clusterAleatoire/",projet,"-colorSample.png",sep="")
+		species<-puceInfo$Species
 	}
-	species<-puceInfo$Species
 	ylim<-round(max(abs(-log10(pvalRaw))),0)
 	ylim<-ylim+1
-	pathPNG<-paste(projet,"-05-student",sep="")
-	pathAnnot<-paste(projet,"-06-annotation",sep="")
-	print(projet)
-	print(dim(pvalRaw))	
-		graphFile<-clusterAnalyse(mat=m.filtered,info=infoGeneAnot,comparaison=comparaison,f=frameFac,pvalRaw=pvalRaw,pathPNG=pathPNG,pathAnnot=pathAnnot,projet=projet,species=species,seuil=seuilPic,ylim=ylim)
-		print(graphFile)
+	pathPNG<-as.character(treepath$student)
+	pathAnnot<-as.character(treepath$annotation)
+	info<-infoGeneAnot[as.character(row.names(m.filtered)),]
+	graphFile<-clusterAnalyse(mat=m.filtered,info=info,comparaison=comparaison,f=frameFac,pvalRaw=pvalRaw,pathPNG=pathPNG,pathAnnot=pathAnnot,projet=projet,species=species,seuil=seuilPic,ylim=ylim)
+	print(graphFile)
 
-	  	fileMatrix <-paste(projet,"-04-filtre/",projet,"-matrix-filtreeMatrix.png",sep="")
-	  	fileTree <- paste(projet,"-04-filtre/atr.",projet,"-matrix-filtreeArray.png",sep="")
+  	fileMatrix <-paste(projet,"-04-filtre/",projet,"-matrix-filtreeMatrix.png",sep="")
+  	fileTree <- paste(projet,"-04-filtre/atr.",projet,"-matrix-filtreeArray.png",sep="")
 	  fileTexCluster<-NULL
 
 		for(i in 1:length(graphFile)){
@@ -636,8 +646,8 @@ if(Annotation==TRUE){
 	write.table(finalPV,file=paste(path,"/",projet,"-allpval.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
 	write.table(finalFC,file=paste(path,"/",projet,"-allFC.txt",sep=""),row.names=TRUE,col.names=NA,sep="\t",quote=FALSE)	
 	print(tabGenDiff)
-	tex_genDiff(tabGenDiff)
-	tex_genDiff(tabGenDiffRaw,fileName="rapport/genDiffRaw.tex")
+	tex_genDiff(tabGenDiff,dirName=treepath$rapport)
+	tex_genDiff(tabGenDiffRaw,dirName=treepath$rapport,file="genDiffRaw.tex")
 	if(Annotation && nbListGene != 0){
 		resultDir<-paste(pathAnot,"/resultat",sep="")
 		commandAnnotation<-paste("gominer -p ",filePuce," -f ",fileList, " -s ", species, " -r ", resultDir,sep="")
