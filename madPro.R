@@ -667,7 +667,7 @@ if(Annotation==TRUE){
 	}
 
 	info<-toLatex(sessionInfo(),local=FALSE)
-	write(info,paste(treepath$rapport,"/info.tex",sep="")
+	write(info,paste(treepath$rapport,"/info.tex",sep=""))
 	print("FIN")
 
 
