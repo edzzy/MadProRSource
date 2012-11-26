@@ -631,7 +631,7 @@ if(dCluster==TRUE){
 				appendFirst = TRUE
 			}
 
-			tex_clusterImage(outImage, paste("rapport/graphCluster.tex",sep=""),versus,appendFirst,projet)
+			tex_clusterImage(outImage, paste(treepath$rapport,"/graphCluster.tex",sep=""),versus,appendFirst,projet)
 			if(is.null(fileTexCluster)){
 				fileTexCluster<-paste(versus,".tex",sep="")
 			}else{
@@ -655,7 +655,7 @@ if(Annotation==TRUE){
 		filesGominer<-dir(path=resultDir, pattern="^S_*")
 		print(filesGominer)
 		for (i in 1:length(filesGominer)){
-			fileNamesGominer<-"rapport/annotGeneDiff.tex"
+			fileNamesGominer<-paste(treepath$rapport,"/annotGeneDiff.tex",sep="")
 			tmpFiles<-paste(resultDir,"/",filesGominer[i],sep="")
 			title<-sub("S_(.*)-(UP|DOWN).*","\\1 : \\2",filesGominer[i])
 			tex_tab2tex(tmpFiles,fileNamesGominer,title=title)
@@ -667,7 +667,7 @@ if(Annotation==TRUE){
 	}
 
 	info<-toLatex(sessionInfo(),local=FALSE)
-	write(info,"rapport/info.tex")
+	write(info,paste(treepath$rapport,"/info.tex",sep="")
 	print("FIN")
 
 

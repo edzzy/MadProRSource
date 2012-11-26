@@ -151,7 +151,7 @@ tex_genDiff<-function(tabGenDiff,projet,dirName=".",file="genDiff.tex"){
 
 
 tex_importData<-function(typeArray,dye,dirName="."){
- fileName<-paste(dirName,"/importData.tex",sep="") 
+fileName<-paste(dirName,"/importData.tex",sep="") 
 	puce<-NULL
 	color<-NULL
 	scan<-NULL

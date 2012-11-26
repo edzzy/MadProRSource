@@ -38,7 +38,7 @@ clusterAnalyse<-function(mat,comparaison,f,pvalRaw,info,pathPNG="./",pathAnnot="
 	
 				for (j in 1:length(filesSfdr)){
 					if(nrow(read.delim(paste(resultDir,filesSfdr[j],sep="/"))) !=0){
-						rapportDir<-paste(prefixname,"-rapport",sep="")
+						rapportDir<-treepath$rapport
 						fileNamesGominer<-paste(rapportDir,"/AnnotationCluster.tex",sep="")
 						if(!file.exists(rapportDir)){
 							dir.create(rapportDir)
