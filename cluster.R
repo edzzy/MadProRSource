@@ -1,4 +1,4 @@
-clusterAnalyse<-function(mat,comparaison,f,pvalRaw,info,pathPNG="./",pathAnnot="./",projet="",species="h",seuil=2,ylim=NULL){
+clusterAnalyse<-function(mat,comparaison,f,pvalRaw,info,treepath=treepath,pathPNG="./",pathAnnot="./",projet="",species="h",seuil=2,ylim=NULL){
 
 	#Nom du fichier contenant toute les annotations
 	filePuce<-paste(pathAnnot,"/",projet,"-puce.txt",sep="")
@@ -24,7 +24,7 @@ clusterAnalyse<-function(mat,comparaison,f,pvalRaw,info,pathPNG="./",pathAnnot="
 			extractCluster(coord,info,dir=pathAnnot,pref=prefixName)
 			#Annotation
 			fileList<-paste(pathAnnot,"/",prefixName,"/list.txt",sep="")
-			resultDir<-paste(pathAnnot,"/",prefixName,"/resultat",sep="")
+			resultDir<-paste(pathAnnot,prefixName,"/resultat",sep="")
 
 			if(file.exists(fileList)){
 				commandAnnotation<-paste("gominer -p ",filePuce," -f ",fileList, " -s ", species, " -r ", resultDir,sep="")
@@ -38,13 +38,13 @@ clusterAnalyse<-function(mat,comparaison,f,pvalRaw,info,pathPNG="./",pathAnnot="
 	
 				for (j in 1:length(filesSfdr)){
 					if(nrow(read.delim(paste(resultDir,filesSfdr[j],sep="/"))) !=0){
-						rapportDir<-treepath$rapport
+						rapportDir<-as.character(treepath$rapport)
 						fileNamesGominer<-paste(rapportDir,"/AnnotationCluster.tex",sep="")
 						if(!file.exists(rapportDir)){
 							dir.create(rapportDir)
 						}
 
-						tmpFile<-paste(resultDir,"/",filesSfdr[j],sep="")
+						tmpFile<-paste(resultDir,filesSfdr[j],sep="")
 
 						title<-sub("S_(.*)_(\\d*)\\.txt.*fdrse.txt","\\1 : Cluster ",filesSfdr[j])
 						title<-paste(title,clust,sep="")
@@ -75,6 +75,16 @@ clusterAnalyse<-function(mat,comparaison,f,pvalRaw,info,pathPNG="./",pathAnnot="
 						file.rename(paste(resultDir,filesSfdr[j],sep="/"),paste(resultDir,tmpFdrName,sep="/"))
 						file.rename(paste(resultDir,gceName[j],sep="/"),paste(resultDir,tmpGceName,sep="/"))
 						file.rename(paste(resultDir,Ename[j],sep="/"),paste(resultDir,EnameTmp,sep="/"))
+							
+						resultAnotdir<-paste(as.character(treepath$resultatClustAnnot),prefixName,sep="")
+
+
+						if(!file.exists(resultAnotdir)){
+							dir.create(resultAnotdir)
+						}
+						file.copy(paste(resultDir,tmpFdrName,sep="/"),paste(resultAnotdir,tmpFdrName,sep="/"))
+						file.copy(paste(resultDir,tmpGceName,sep="/"),paste(resultAnotdir,tmpGceName,sep="/"))
+						file.copy(paste(resultDir,EnameTmp,sep="/"),paste(resultAnotdir,EnameTmp,sep="/"))
 
 						tex_tab2tex(paste(resultDir,tmpFdrName,sep="/"),fileNamesGominer,title=title)
 
@@ -92,8 +102,8 @@ clusterAnalyse<-function(mat,comparaison,f,pvalRaw,info,pathPNG="./",pathAnnot="
 }
 		#Graph cluster
 	}
-	out_name<-paste(pathPNG,"/",projet,prefixName,".png",sep="")
-	out_name2<-paste(pathPNG,"/",projet,prefixName,"2.png",sep="")
+	out_name<-paste(pathPNG,projet,prefixName,".png",sep="")
+	out_name2<-paste(pathPNG,projet,prefixName,"2.png",sep="")
 	graphFile<-c(graphFile,out_name)	
 
 	f<-as.matrix(f)

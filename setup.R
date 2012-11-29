@@ -140,7 +140,7 @@ getPuceInfo<-function(design){
 	if(nrow(info) != 0){
 		return(info)
 	}else{
-		message<-paste("Puce de design", design , "est inexistant")
+		message<-paste("Puce de design", design , "est nexistant")
 		stop(message)	
 	}
 }

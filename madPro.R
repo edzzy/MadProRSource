@@ -604,14 +604,16 @@ if(dCluster==TRUE){
 		load(dir(pattern="*-dataFilter.Rdata"))
 		species<-puceInfo$Species
 		outfileColor<-paste(projet,"-03-clusterAleatoire/",projet,"-colorSample.png",sep="")
-		species<-puceInfo$Species
 	}
+		outfileColor<-paste(projet,"-03-clusterAleatoire/",projet,"-colorSample.png",sep="")
+		species<-puceInfo$Species
 	ylim<-round(max(abs(-log10(pvalRaw))),0)
 	ylim<-ylim+1
 	pathPNG<-as.character(treepath$student)
 	pathAnnot<-as.character(treepath$annotation)
 	info<-infoGeneAnot[as.character(row.names(m.filtered)),]
-	graphFile<-clusterAnalyse(mat=m.filtered,info=info,comparaison=comparaison,f=frameFac,pvalRaw=pvalRaw,pathPNG=pathPNG,pathAnnot=pathAnnot,projet=projet,species=species,seuil=seuilPic,ylim=ylim)
+	graphFile<-clusterAnalyse(mat=m.filtered,info=info,treepath=treepath,comparaison=comparaison,f=frameFac,pvalRaw=pvalRaw,pathPNG=pathPNG,pathAnnot=pathAnnot,projet=projet,species=species,seuil=seuilPic,ylim=ylim)
+
 	print(graphFile)
 
   	fileMatrix <-paste(projet,"-04-filtre/",projet,"-matrix-filtreeMatrix.png",sep="")
@@ -622,6 +624,10 @@ if(dCluster==TRUE){
 
 			outImage<-sub("(.*).png","\\1",graphFile[i])
 			outImage<-paste(outImage,"-Stat.png",sep="")
+		#	statImage<-paste(as.character(treepath$student),graphFile[i],sep="/")
+			print(outImage)
+		#	print(statImage)
+			
 
 			graphStatClust(matrixImage=fileMatrix,boxImage=outfileColor, treeImage=fileTree,statImage=graphFile[i],outImage=outImage)	
 			versus<-paste(comparaison[1,i],"-VS-",comparaison[2,i],sep="")
