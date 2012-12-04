@@ -603,9 +603,9 @@ if(dCluster==TRUE){
 	if(tStat == FALSE){
 		load(dir(pattern="*-dataFilter.Rdata"))
 		species<-puceInfo$Species
-		outfileColor<-paste(projet,"-03-clusterAleatoire/",projet,"-colorSample.png",sep="")
+		outfileColor<-paste(projet,"-04-filtre/",projet,"-colorSample.png",sep="")
 	}
-		outfileColor<-paste(projet,"-03-clusterAleatoire/",projet,"-colorSample.png",sep="")
+		outfileColor<-paste(projet,"-04-filtre/",projet,"-colorSample.png",sep="")
 		species<-puceInfo$Species
 	ylim<-round(max(abs(-log10(pvalRaw))),0)
 	ylim<-ylim+1
