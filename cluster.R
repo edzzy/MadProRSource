@@ -173,12 +173,18 @@ extendBegin<-function(begin,sensGraph){
 	while(test == FALSE){
 		indiceValle<-begin -1
 		nbegin<-max(which(sens != sensGraph[1:indiceValle]))
+#		print(nbegin)
 		if(begin == 51){ 
 			test<-TRUE
 		}else{
 		
 			tmpbegin<-nbegin-50
 			test<- sum(sensGraph[tmpbegin:nbegin]) < -10
+			if(is.na(test)){
+				test<-TRUE
+				nbegin<-0
+				
+			}
 			begin<-nbegin-1
 		}
 		message<-paste(test," ",begin,sep="")
@@ -202,9 +208,14 @@ extendEnd<-function(end,sensGraph){
 		nend<-length(sensGraph[1:end]) +nend
 		tmpend<- nend + 50
 		test<-sum(sensGraph[nend:tmpend])  > 10
+		if(is.na(test)){
+			nend<-length(sensGraph)	
+		}
 		end<-nend+1
 	}	
-
+	if(nend > length(sensGraph)){
+		nend<-length(sensGraph)
+	}
 	return(nend)
 
 

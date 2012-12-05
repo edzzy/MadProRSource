@@ -106,6 +106,14 @@ return(as.data.frame(treepath))
 getPattern<-function(file){
 
 	pattern<-read.delim(file,skip=1,nrow=1,header=TRUE)$FeatureExtractor_PatternName
+	if(is.null(pattern)){
+		pattern<-read.delim(file,skip=1,nrow=1,header=TRUE)$FeatureExtractor_DesignFileName
+		pattern<-strsplit(as.character(pattern),"_")[[1]][1]
+		pattern<-paste("Agilent",pattern,sep="-")
+	}
+	if(is.null(pattern)){
+		stop("les colonne FeatureExtractor_DesignFileName et FeatureExtractor_PatternName sont absente")
+	}
 	
 	return(as.character(pattern))
 	
@@ -140,7 +148,7 @@ getPuceInfo<-function(design){
 	if(nrow(info) != 0){
 		return(info)
 	}else{
-		message<-paste("Puce de design", design , "est nexistant")
+		message<-paste("Puce de design", design , "est inexistant")
 		stop(message)	
 	}
 }
