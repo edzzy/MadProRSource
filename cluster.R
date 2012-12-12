@@ -21,7 +21,7 @@ clusterAnalyse<-function(mat,comparaison,f,pvalRaw,info,treepath=treepath,pathPN
 		prefixName<-paste(comparaison[1,i],comparaison[2,i],sep="-VS-")
 
 		if(!is.null(coord)){
-			extractCluster(coord,info,dir=pathAnnot,pref=prefixName)
+			outNameList<-extractCluster(coord,info,dir=pathAnnot,pref=prefixName)
 			#Annotation
 			fileList<-paste(pathAnnot,"/",prefixName,"/list.txt",sep="")
 			resultDir<-paste(pathAnnot,prefixName,"/resultat",sep="")
@@ -68,8 +68,10 @@ clusterAnalyse<-function(mat,comparaison,f,pvalRaw,info,treepath=treepath,pathPN
 						prefix<-sub("S_(.*)_\\d*\\.txt.*fdrse.txt","\\1",filesSfdr[j])
 
 
-						fileListCluster<-paste(pathComp,"/",prefix,"_",j,".txt",sep="")
-						newFileListCluster<-paste(pathComp,"/",prefix,"_",clust,".txt",sep="")
+						fileCluster<-paste(	prefix,"_",j,".txt",sep="")
+						fileListCluster<-paste(pathComp,"/",fileCluster,sep="")
+						fileCluster<-paste(	prefix,"_",clust,".txt",sep="")
+						newFileListCluster<-paste(pathComp,"/",fileCluster,sep="")
 						file.rename(fileListCluster,newFileListCluster)
 
 						file.rename(paste(resultDir,filesSfdr[j],sep="/"),paste(resultDir,tmpFdrName,sep="/"))
@@ -85,6 +87,7 @@ clusterAnalyse<-function(mat,comparaison,f,pvalRaw,info,treepath=treepath,pathPN
 						file.copy(paste(resultDir,tmpFdrName,sep="/"),paste(resultAnotdir,tmpFdrName,sep="/"))
 						file.copy(paste(resultDir,tmpGceName,sep="/"),paste(resultAnotdir,tmpGceName,sep="/"))
 						file.copy(paste(resultDir,EnameTmp,sep="/"),paste(resultAnotdir,EnameTmp,sep="/"))
+						file.copy(newFile,paste(resultAnotdir,EnameTmp,sep="/"))
 
 						tex_tab2tex(paste(resultDir,tmpFdrName,sep="/"),fileNamesGominer,title=title)
 
@@ -93,6 +96,10 @@ clusterAnalyse<-function(mat,comparaison,f,pvalRaw,info,treepath=treepath,pathPN
 
 
 				}else{
+					fileListCluster<-paste(pathComp,"/",prefix,"_",j,".txt",sep="")
+					newFileListCluster<-paste(pathComp,"/",prefix,"_NA_",j,".txt",sep="")
+					file.rename(fileListCluster,newFileListCluster)
+
 					prefix<-sub("S_(.*)(_\\d*)\\.txt.*fdrse.txt","\\1\\2",filesSfdr[j])
 					files2remove<-dir(path=resultDir,pattern=prefix)
 					files2remove<-paste(resultDir,files2remove,sep="/")
@@ -262,16 +269,20 @@ fusionCluster<-function(begin,end){
 extractCluster<-function(coordClust,info,pref="clust",dir="./"){
 
 	fileList<-paste(dir,"/",pref,"/list.txt",sep="")
+	outNameList<-""
 	for(i in 1:nrow(coordClust)){
 		clust<-info[coordClust[i,1] : coordClust[i,2],]$GeneName
 		pathName<-paste(dir,"/",pref,sep="")
 		if(!file.exists(pathName)){
 			dir.create(pathName)
-			}
+		}
 		outname<-paste(pathName,"/",pref,"_",i,".txt",sep="")
 		cat(outname,"\n",file=fileList,append=TRUE,sep="")
 		write.table(clust,outname,sep="\t",quote=FALSE,row.names=FALSE,col.names=FALSE)
+		outNameList<-c(outNameList,outName)
 	}
+	return(outNameList)
+
 }
 clusterEinsen<-function(f,l=TRUE,cg="m",ng=FALSE,na=FALSE,ca=NULL,u=NULL,g=1,e=1,m="c",k=NULL,r=NULL,pg=NULL,pas=NULL,s=NULL,x=2,y=1){
 	if(!file.exists(f)){

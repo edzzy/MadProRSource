@@ -323,3 +323,38 @@ r<-NA
 }
 return(r)
 }
+all_cor_rep<-function(data,replicat,suffix=""){
+	repId<-which(summary(replicat) > 1)
+		for(i in 1:length(repId)){
+			graph_cor_rep(names(repId)[i],data,suffix)	
+		}
+	
+}
+
+
+graph_cor_rep<-function(replicat,tabCor,suffix=""){
+	ylim<-min(tabCor)
+	output_name=paste(replicat,"_",suffix,".jpg",sep="")
+	bottomarg = nchar(max(colnames(tabCor))) #nombre de ligne pour la marge du bas
+	id<-grep(replicat,colnames(tabCor))
+	corRep<-tabCor[,id[1]]
+	corRep<-sort(corRep,decreasing=TRUE)
+	id<-grep(replicat,names(corRep))
+	print(id)
+    pcol<-rep(1,ncol(tabCor))
+	pcol[id]<-3
+
+	jpeg(filename = output_name, width = 1300, height = 900, quality = 100, bg = "white", res = NA)
+    par(mar=c(bottomarg +5,5,3,3))
+	plot(corRep, type="l",xlab="", ylab=paste("Correlation ", replicat,sep=""), ylim=c(ylim,1),cex.lab=1.5,cex.axis=1.5,xaxt="n")
+    points(corRep, col=pcol,xlab="",pch=19,cex=1.5, ylab="Correlation par rapport au profil median", ylim=c(0,1),cex.lab=1.5,cex.axis=1.5,xaxt="n")
+	axis(1,1:dim(tabCor)[2],labels=names(corRep),las="2",cex.axis=1.5)
+    abline(h=0.9,col="red")
+	abline(v=id,col="green")
+    dev.off()
+	
+	
+}
+
+
+

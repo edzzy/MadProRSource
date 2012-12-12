@@ -206,12 +206,16 @@ if(Normalise == "L" | Normalise =="Q"){
 		##Génération fichiers TEX stat Descr et corrélation
 		tex_boxplot(projet,dirName=treepath$rapport)
 		tex_Corre(projet,echBadCor,echBadCorNorm,dirName=treepath$rapport)
+		
 
 		save(projet,frameFac,dataN,pData,pSetup,puceInfo,treepath,infoGeneAnot,comparaison,file=paste(projet,"-dataNorm.Rdata",sep=""))
 	
 }
 
 if(Filtrage==TRUE){
+	if(import==FALSE){
+		load(dir(pattern="*-dataNorm.Rdata"))
+		}
 	if(is.null(dim(frameFac))){
 		annotFilter<-as.factor(as.character(unlist(frameFac)))
 	}else{

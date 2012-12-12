@@ -137,4 +137,13 @@ function(x){
 	}
 	return(r)
 }
-
+corUn<-function(x,y){
+	n<-length(x)
+	x<-as.numeric(as.character(x))
+	y<-as.numeric(as.character(y))
+	rX<- sqrt((1/n * sum(x)^2))
+	rY<- sqrt((1/n * sum(y)^2))
+	r<- (1/n) * sum((x/rX) * (y/rY))
+	
+	return(r)	
+}
