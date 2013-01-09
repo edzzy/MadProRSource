@@ -224,10 +224,13 @@ tex_norm<-function(projet,filesNorm,dirName="."){
     \\begin{longtable}{cc}\n", file = fileName,append=FALSE)
   include<-"\\includegraphics[scale=0.15]{"
   carac<-"}& \n"
+  i<-0
   for(i in 1:length(filesNorm)){
-      if (i %% 2 == 0){
+      if (i  == 0){
         carac<-"} \\\\\n"
+		i<-1
       }else{
+		  i<-0
         carac<-"} &\n"      
       }
       includeTex<-paste(include,"../",filesNorm[i],carac,sep="")

@@ -28,7 +28,7 @@ function (data,output_name)
  jpeg(filename = output_name, width = 1300, height = 900, quality = 100, bg = "white", res = NA)
  par(mar=c(bottomarg + 5,5,3,3))
  boxplot(log(as.data.frame(data)), col="darkolivegreen2", las="2",cex.lab=1.5,cex.axis=1.5)
-  dev.off()
+ devname= dev.off()
 }
 
 
@@ -94,7 +94,7 @@ print(nbgenes)
     if(nbgenes>19999){v20000p=dataSortedBySample[1+19999,]}
 
     x = c(1,nbech+1) #x pour le plot invisible
-    rangev = range(v1,v1p) #pour y : 'range' returns a vector containing the minimum and maximum of all the given arguments.
+    rangev = range(v1,v1p) #pour y : 'range' returns a vector containing the minimum and maximum of ll the given arguments.
     max = max(v1)
     milieu = max/2 #milieu de l'axe des y
 
@@ -323,18 +323,23 @@ r<-NA
 }
 return(r)
 }
-all_cor_rep<-function(data,replicat,suffix=""){
+all_cor_rep<-function(data,replicat,path="",suffix=""){
+	tabcor<-cor(data,data)
+#	if(annotation$Replicat){
+#
+#	}
+#	replicat<-annotationt$Replicat
 	repId<-which(summary(replicat) > 1)
 		for(i in 1:length(repId)){
-			graph_cor_rep(names(repId)[i],data,suffix)	
+			graph_cor_rep(names(repId)[i],tabcor,path,suffix)	
 		}
 	
 }
 
 
-graph_cor_rep<-function(replicat,tabCor,suffix=""){
+graph_cor_rep<-function(replicat,tabCor,path,suffix=""){
 	ylim<-min(tabCor)
-	output_name=paste(replicat,"_",suffix,".jpg",sep="")
+	output_name=paste(path,replicat,"_",suffix,".jpg",sep="")
 	bottomarg = nchar(max(colnames(tabCor))) #nombre de ligne pour la marge du bas
 	id<-grep(replicat,colnames(tabCor))
 	corRep<-tabCor[,id[1]]
@@ -355,6 +360,23 @@ graph_cor_rep<-function(replicat,tabCor,suffix=""){
 	
 	
 }
+QC_Graph<-function(mat,info,path="./",prefix="Q"){
+	mat<-log2(mat)
 
-
-
+	jpeg(paste(path,"/",prefix,"_QC.jpg",sep=""),width=1300,height=1300)
+	par(mfrow=c(ncol(mat),3))
+	for(i in 1:ncol(mat)){
+		hist(mat[which(info$ControlType == 0),i],xlab="log_intensite",ylab="frequence",main=paste("Sondes non controle ",colnames(mat)[i],sep=""),breaks="Scott")
+		hist(mat[which(info$ControlType == 1),i],xlab="log_intensite",ylab="frequence",main=paste("Sondes pos controle ",colnames(mat)[i] ,sep=""),breaks="Scott")
+		hist(mat[which(info$ControlType == -1),i],xlab="log_intensite",ylab="frequence",main=paste("Sondes neg controle ",colnames(mat)[i],sep=""),breaks="Scott")
+	
+	}
+	dev.off()
+	
+}
+HTML_img<-function(image_file,html_file){
+	cat("<HTML>\n\t<HEAD>\n\t</HEAD>\n\t<BODY>\n",file=html_file)
+	balise_image<-paste("\t\t<IMG SRC=\"",image_file,"\"/>\n",sep="")
+	cat(balise_image,file=html_file,append=TRUE)
+	cat("\tTest</BODY>\n</HTML>",file=html_file,append=TRUE)
+}

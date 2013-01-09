@@ -1,6 +1,12 @@
 `madPro` <-
-function(pSetupFile="pSetup.txt",Normalise="L",clusteringALEA=TRUE,Filtrage=TRUE,Cluster=TRUE,tStat=TRUE,import=TRUE,Annotation=TRUE,clustering=TRUE,dCluster=TRUE){
-
+function(pSetupFile="pSetup.txt",Normalise="L",clusteringALEA=TRUE,Filtrage=TRUE,Cluster=TRUE,tStat=TRUE,import=TRUE,Annotation=TRUE,clustering=TRUE,dCluster=TRUE,QC=FALSE){
+if(QC==TRUE){
+	Cluster=FALSE
+	tStat=FALSE
+	Annotation=FALSE
+	clustering=TRUE
+	dCluster=FALSE	
+}
 if(import){
 	nError = 0
 	#-Importation du fichier de setup
@@ -135,14 +141,13 @@ if(Normalise == "L" | Normalise =="Q"){
 	print("Correlation")
 	cat("** \nCorrelation avant normalisation\n",append=TRUE,file=logNames)
 	output_name = paste(treepath$stat,projet,"-raw-correlation.jpeg",sep="")
-	if(!file.exists(output_name)){
+
 		echBadCor<-create_correlation_median(dataMA,output_name)
 
-		if(!is.null(echBadCor)){
-			cat("echantillons dont la correlation avec le profil median est <0.8",echBadCor,"\n",append=TRUE,file=logNames)
-		}else{
-			cat("OK\n",append=TRUE,file=logNames)
-		}
+	#Corrélation des échantillons
+	if(!is.null(pData$Replicat)){
+		replicat<-pData$Replicat
+		all_cor_rep(data=log10(dataMA),replicat=replicat,path=treepath$stat,suffix="Raw")
 	}
 	####NORMALISATION  (LOWESS)##########
 
@@ -156,6 +161,10 @@ if(Normalise == "L" | Normalise =="Q"){
 			dataN<-normQuantile(mat=as.matrix(dataMA),pngDir = treepath$normalisation)
 		}
 
+		if(!is.null(pData$Replicat)){
+			replicat<-pData$Replicat
+			all_cor_rep(data=log10(dataN),replicat=replicat,path=treepath$normalisationImage,suffix="Norm")
+		}
 		write.table(dataN,nomFile,sep="\t",row.names=TRUE, col.names=NA,quote=FALSE)
 		fileName<- paste(treepath$normalisation,projet,"-normalisationInfo.txt",sep="")
 		tmpinfoGene<-infoGeneAnot[rownames(dataN),]
@@ -236,7 +245,11 @@ if(Filtrage==TRUE){
 
 		################
 		###Cluster######
-		sampMatrix<-clusterEinsen(f=sampleMName)
+		if(QC == TRUE){
+			sampMatrix<-clusterEinsen(f=sampleMName,g=0)
+		}else{
+			sampMatrix<-clusterEinsen(f=sampleMName)
+		}
 	#	print("debut clustering matrice aleatoire")
 	#	commandCluster<-paste(" cluster -f ",sampleMName," -l  -cg m -g 1 -e 1  -m c",sep="")
 	#	print(system.time(try(system(commandCluster,intern=TRUE))))
@@ -272,6 +285,8 @@ if(Filtrage==TRUE){
 	#####################Utilisation de matrix2png pour le clustering de la matrice aleatoire
 	
 		mapName<-paste(projet,"-color.txt",sep="")
+		print(colnames(sampMatrix))
+		print(dim(sampMatrix))
 		frameFac<-as.data.frame(frameFac)[,colnames(sampMatrix)]
 		frameFacN<-frameFac
 		frameNames<-paste(projet,"-03-clusterAleatoire/",projet,"-frameFac.txt",sep="")
@@ -293,20 +308,23 @@ if(Filtrage==TRUE){
 		#Si il n'y a qu'un parametre il faut tester (conflit data.frame et vecteur)
 		#filtre<-result_filter(filtrage_non_exprimes(sampMatrix,nbclasses,annotFilter,seuil,nval)
 		#filtre<-as.numeric(result_filter)
+		print(annotFilter)
 		result_filter<-filtrage_non_exprimes(sampMatrix,nbclasses,annotFilter,seuil,nval)
 		filtre<-as.numeric(result_filter)
 		########Graph visualisation du filtre choix des sondes
-		filename=paste(projet,"-03-clusterAleatoire/",projet,"-filtre.png",sep="")
-		graphMmobile(filename,filtre)
-		######Visualisation du signal median et du seuil
-		profmed<-apply(sampMatrix,1,median)
-		profmed<-log10(profmed)
-		lseuil<-log10(seuil)
-		filename=paste(projet,"-03-clusterAleatoire/",projet,"-signalMedian.png",sep="")
-		graphMmobile(filename,profmed,lseuil)
-		#########################
-		montageMont<-paste("madProMontage.pl -b ",outfileColor," -m ",projet,"-03-clusterAleatoire/",sampleMPrefixShort,"Matrix.png -t ",projet,"-03-clusterAleatoire/atr.",sampleMPrefixShort,"Array.png -g ",filename," -o ",projet,"-03-clusterAleatoire/",projet,"-filtrageCluster.png",sep="")
-		system(montageMont)
+		if(QC==FALSE){
+			filename=paste(projet,"-03-clusterAleatoire/",projet,"-filtre.png",sep="")
+			graphMmobile(filename,filtre)
+			######Visualisation du signal median et du seuil
+			profmed<-apply(sampMatrix,1,median)
+			profmed<-log10(profmed)
+			lseuil<-log10(seuil)
+			filename=paste(projet,"-03-clusterAleatoire/",projet,"-signalMedian.png",sep="")
+			graphMmobile(filename,profmed,lseuil)
+			#########################
+			montageMont<-paste("madProMontage.pl -b ",outfileColor," -m ",projet,"-03-clusterAleatoire/",sampleMPrefixShort,"Matrix.png -t ",projet,"-03-clusterAleatoire/atr.",sampleMPrefixShort,"Array.png -g ",filename," -o ",projet,"-03-clusterAleatoire/",projet,"-filtrageCluster.png",sep="")
+			system(montageMont)
+		}
 		montageTree<-paste("montage ",projet,"-03-clusterAleatoire/atr.",sampleMPrefixShort,"Array.png ",outfileColor," -geometry +0+0 -tile 1x ",projet,"-03-clusterAleatoire/",projet,"-TreeArraycolor.png",sep="")
 		system(montageTree)
 		fileTree=paste(projet,"-03-clusterAleatoire/",projet,"-TreeArraycolor.png",sep="")
@@ -336,6 +354,10 @@ if(Filtrage==TRUE){
 	
 	tex_filtrage(projet,annotFilter,seuil,nrow(dataN),nrow(m.filtered),nval,dirName=treepath$rapport)
 	
+	if(!is.null(pData$Replicat)){
+		replicat<-pData$Replicat
+		all_cor_rep(data=log10(m.filtered),replicat=replicat,path=treepath$filtre,suffix="Filtre")
+	}
 	
 	cat("\nseuil",seuil,file=logNames,sep="\t",append=TRUE)
 	cat("\nnombre de sonde total",nrow(dataN),file=logNames,sep="\t",append=TRUE)
@@ -360,15 +382,20 @@ if(clustering==TRUE){
 	################Clustering de la matrice totale
 	print("debut clustering matrice totale")
 	write.table(m.filtered,filterName,col.names=NA,row.names=TRUE,sep="\t",quote=FALSE)
-	m.filtered<-clusterEinsen(filterName)
+	if(QC == TRUE){
+		m.filtered<-clusterEinsen(filterName,g=0)
+	}else{
+		m.filtered<-clusterEinsen(filterName)
+	}
 #	commandCluster<-paste(" cluster -f ",filterName," -l  -cg m -g 1 -e 1  -m c",sep="")
 #	print(system.time(system(commandCluster)))
 		
 	print("fin clustering matrice totale")
 	frameFac<-frameFac[,colnames(m.filtered)]
-	commandSlcviewMatrix<-paste("slcview.pl ",filterMPrefix,".cdt -xsize 25 -height 1300 -genelabel 0 -gtrresolution 0 -arraylabels 0 -atrresolution 0 -o ",filterMPrefix,"Matrix.png" ,sep="" )
-		
-	print(system.time(system(commandSlcviewMatrix)))
+	if(QC == FALSE){
+		commandSlcviewMatrix<-paste("slcview.pl ",filterMPrefix,".cdt -xsize 25 -height 1300 -genelabel 0 -gtrresolution 0 -arraylabels 0 -atrresolution 0 -o ",filterMPrefix,"Matrix.png" ,sep="" )
+		print(system.time(system(commandSlcviewMatrix)))
+	}
 		
 	commandSlcviewArray<-paste("slcview.pl ",filterMPrefix,".cdt -xsize 25 -height 1 -gtrresolution 0 -genelabel 0 -noimage -o ",filterMPrefix,"Array.png" ,sep="" )
 		
@@ -384,7 +411,7 @@ if(clustering==TRUE){
 #	nG<-as.character(nG)
 #	m.filtered<-m.filtered[nG,]
 #	frameFacF<-frameFac
-
+	if(QC==FALSE){
 	info<-infoGeneAnot[as.character(row.names(m.filtered)),]
 	newMat<-cbind(info,m.filtered)
 #	colnames(newcdt)[1]<-"GID"
@@ -402,7 +429,7 @@ if(clustering==TRUE){
 	rm(newcdt)
 	rm(matcdt)
 	rm(infocdt)
-	
+	}
 	########Utilisation de matrix2png pour visualation des parametres
 	frameNames<-paste(projet,"-04-filtre/",projet,"-frameFacF.txt",sep="")
 	write.table(frameFac,frameNames,sep="\t",row.names=FALSE,quote=FALSE);
@@ -416,15 +443,15 @@ if(clustering==TRUE){
 	rotateTree<-paste("convert ",fileTree, " -rotate 90 ",fileTree,sep="")
 	system(rotateTree)
 	
-	
+	if(QC==FALSE){
 		filterName<-paste(projet,"-04-filtre/",projet,"-matrix_filtreeInfo.txt",sep="")
 		tmpinfoGene<-infoGeneAnot[rownames(m.filtered),]
 		tmpDataMA<-cbind(tmpinfoGene,m.filtered)
 		write.table(tmpDataMA,filterName,col.names=NA,sep="\t",quote=FALSE,row.names=TRUE);
 		rm(tmpDataMA)
-	
+	}
 		save(projet,frameFac,m.filtered,pData,pSetup,puceInfo,treepath,comparaison,infoGeneAnot,file=paste(projet,"-dataFilter.Rdata",sep=""))
-
+	
 
 }
 ########test stat

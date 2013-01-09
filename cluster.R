@@ -87,7 +87,7 @@ clusterAnalyse<-function(mat,comparaison,f,pvalRaw,info,treepath=treepath,pathPN
 						file.copy(paste(resultDir,tmpFdrName,sep="/"),paste(resultAnotdir,tmpFdrName,sep="/"))
 						file.copy(paste(resultDir,tmpGceName,sep="/"),paste(resultAnotdir,tmpGceName,sep="/"))
 						file.copy(paste(resultDir,EnameTmp,sep="/"),paste(resultAnotdir,EnameTmp,sep="/"))
-						file.copy(newFile,paste(resultAnotdir,EnameTmp,sep="/"))
+						file.copy(newFileListCluster,paste(resultAnotdir,EnameTmp,sep="/"))
 
 						tex_tab2tex(paste(resultDir,tmpFdrName,sep="/"),fileNamesGominer,title=title)
 
@@ -279,7 +279,7 @@ extractCluster<-function(coordClust,info,pref="clust",dir="./"){
 		outname<-paste(pathName,"/",pref,"_",i,".txt",sep="")
 		cat(outname,"\n",file=fileList,append=TRUE,sep="")
 		write.table(clust,outname,sep="\t",quote=FALSE,row.names=FALSE,col.names=FALSE)
-		outNameList<-c(outNameList,outName)
+		outNameList<-c(outNameList,outname)
 	}
 	return(outNameList)
 
@@ -340,7 +340,12 @@ clusterEinsen<-function(f,l=TRUE,cg="m",ng=FALSE,na=FALSE,ca=NULL,u=NULL,g=1,e=1
 	data<-read.delim(file=f,header=TRUE,row.names=1)
 	dataClust<-read.delim(file=filecdt,header=TRUE,row.names=1)
 	geneNames<-dataClust$NAME[-1:-2]
-	sampleNames<-colnames(dataClust)[which(!is.na(dataClust[2,]))][-1:-2]
+	if(g != 0){
+		sampleNames<-colnames(dataClust)[which(!is.na(dataClust[2,]))][-1:-2]
+	}else{
+		sampleNames<-colnames(dataClust)[-1:-2]
+		
+	}
 	
 	data<-data[as.character(geneNames),]
 	data<-data[,as.character(sampleNames)]
