@@ -217,6 +217,7 @@ extendEnd<-function(end,sensGraph){
 		test<-sum(sensGraph[nend:tmpend])  > 10
 		if(is.na(test)){
 			nend<-length(sensGraph)	
+				test<-TRUE
 		}
 		end<-nend+1
 	}	

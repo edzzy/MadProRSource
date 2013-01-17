@@ -506,6 +506,16 @@ if(tStat==TRUE){
 		  	pathDir<-paste(path,"/Comparaison-",versus,sep="")
 		  	if(!file.exists(pathDir))
 		  		dir.create(pathDir)
+
+			frameNames<-paste(projet,"-04-filtre/",projet,"-",versus,"-frameFacF.txt",sep="")
+			frameFacComp<-rbind(frameFac,frameFac)
+			noComp<-which(as.character(unlist(frameFacComp[1,])) != as.character(unlist(comparaison[1,i])) & as.character(unlist(frameFacComp[1,])) != as.character(unlist(comparaison[2,i])) )
+			frameFacComp[1,noComp] = NA
+
+			write.table(frameFacComp,frameNames,sep="\t",row.names=FALSE,quote=FALSE);
+			outfileColor<-paste(projet,"-04-filtre/",projet,"-",versus,"-colorSample.png",sep="")
+			colorName<-paste("makeColor.pl -c ", mapName, " -p " , frameNames ,"  -o ", outfileColor,sep="")
+			system(colorName)
 	
 			dataPval<-pairRows.t.test(comparaison[,i],m.filtered,frameFac,padj.method="BH",path=path,graph=TRUE,projet=projet)
 			colnames(dataPval)<-c(paste(versus,"Raw",sep=""),paste(versus,"Adjust",sep=""))
@@ -659,9 +669,11 @@ if(dCluster==TRUE){
 			print(outImage)
 		#	print(statImage)
 			
+			versus<-paste(comparaison[1,i],"-VS-",comparaison[2,i],sep="")
+			versus2<-paste(comparaison[1,i],"-Vs-",comparaison[2,i],sep="")
+			outfileColor<-paste(projet,"-04-filtre/",projet,"-",versus2,"-colorSample.png",sep="")
 
 			graphStatClust(matrixImage=fileMatrix,boxImage=outfileColor, treeImage=fileTree,statImage=graphFile[i],outImage=outImage)	
-			versus<-paste(comparaison[1,i],"-VS-",comparaison[2,i],sep="")
 			if(i == 1){
 				appendFirst = FALSE
 			}else{

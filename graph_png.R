@@ -282,6 +282,8 @@ dev.off()
 }
 
 graphStatClust<-function(matrixImage,boxImage,treeImage,statImage,outImage){
+	commandImage<-paste("madProMontage.pl -m ", matrixImage  ," -t ", treeImage , " -b ", boxImage , " -g ", statImage , " -o ",outImage )
+	print(commandImage)
 	if(!file.exists(matrixImage)){
 		warning("image matrix n'existe pas image non genérée")	
 		return(FALSE)
@@ -300,8 +302,6 @@ graphStatClust<-function(matrixImage,boxImage,treeImage,statImage,outImage){
 		return(FALSE)
 	}
 
-	commandImage<-paste("madProMontage.pl -m ", matrixImage  ," -t ", treeImage , " -b ", boxImage , " -g ", statImage , " -o ",outImage )
-	print(commandImage)
 	system(commandImage)
 
 }
