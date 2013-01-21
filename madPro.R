@@ -1,5 +1,5 @@
 `madPro` <-
-function(pSetupFile="pSetup.txt",Normalise="L",clusteringALEA=TRUE,Filtrage=TRUE,Cluster=TRUE,tStat=TRUE,import=TRUE,Annotation=TRUE,clustering=TRUE,dCluster=TRUE,QC=FALSE){
+function(pSetupFile="pSetup.txt",Normalise="L",clusteringALEA=TRUE,Filtrage=TRUE,Cluster=TRUE,tStat=TRUE,import=TRUE,Annotation=TRUE,clustering=TRUE,dCluster=TRUE,QC=FALSE,averageRep=FALSE){
 if(QC==TRUE){
 	Cluster=FALSE
 	tStat=FALSE
@@ -107,6 +107,14 @@ if(import){
 		fileName<-paste(dirFile,fileName,sep="/")
 		if(!file.exists(fileName)){
 			write.table(dataMA,fileName,col.names=NA,sep="\t",quote=FALSE);
+		}
+		if(averageRep == TRUE){
+			dataMA<-dataMA[,rownames(pData)]
+			dataMA<-avearrays(x=dataMA,ID=pData$Replicat)
+			colnames(frameFac)<-pData$Replicat
+			frameFac<-t(unique(t(frameFac)))
+			frameFac<-frameFac[,colnames(dataMA)]
+			
 		}
 
 	}else if(typeArray=="NG"){
