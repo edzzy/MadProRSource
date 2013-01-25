@@ -37,6 +37,7 @@ clusterAnalyse<-function(mat,comparaison,f,pvalRaw,info,treepath=treepath,pathPN
 				GominerF=dir(path=resultDir, pattern="^[^E|S].*_fdrse")
 	
 				for (j in 1:length(filesSfdr)){
+						pathComp<-paste(pathAnnot,"/",prefixName,sep="")
 					if(nrow(read.delim(paste(resultDir,filesSfdr[j],sep="/"))) !=0){
 						rapportDir<-as.character(treepath$rapport)
 						fileNamesGominer<-paste(rapportDir,"/AnnotationCluster.tex",sep="")
@@ -96,11 +97,11 @@ clusterAnalyse<-function(mat,comparaison,f,pvalRaw,info,treepath=treepath,pathPN
 
 
 				}else{
+					prefix<-sub("S_(.*)(_\\d*)\\.txt.*fdrse.txt","\\1\\2",filesSfdr[j])
 					fileListCluster<-paste(pathComp,"/",prefix,"_",j,".txt",sep="")
 					newFileListCluster<-paste(pathComp,"/",prefix,"_NA_",j,".txt",sep="")
 					file.rename(fileListCluster,newFileListCluster)
 
-					prefix<-sub("S_(.*)(_\\d*)\\.txt.*fdrse.txt","\\1\\2",filesSfdr[j])
 					files2remove<-dir(path=resultDir,pattern=prefix)
 					files2remove<-paste(resultDir,files2remove,sep="/")
 					file.remove(files2remove)

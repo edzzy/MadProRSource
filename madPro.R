@@ -114,6 +114,8 @@ if(import){
 			colnames(frameFac)<-pData$Replicat
 			frameFac<-t(unique(t(frameFac)))
 			frameFac<-frameFac[,colnames(dataMA)]
+
+
 			
 		}
 
@@ -371,6 +373,8 @@ if(Filtrage==TRUE){
 	cat("\nnombre de sonde total",nrow(dataN),file=logNames,sep="\t",append=TRUE)
 	cat("\nnombre de sonde filtree",nrow(m.filtered),file=logNames,sep="\t",append=TRUE)
 	
+	probes<-infoGeneAnot[rownames(m.filtered),]$ProbeName
+	m.filtered<-avereps(x=m.filtered,ID=probes)
 	
 	
 	#filterName<-paste(projet,"-04-filtre/",projet,"-matrix_filtree.txt",sep="")
