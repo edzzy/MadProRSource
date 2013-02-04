@@ -470,6 +470,7 @@ if(clustering==TRUE){
 if(tStat==TRUE){
 	if(clustering == FALSE){
 		load(dir(pattern="*-dataFilter.Rdata"))
+		mapName<-paste(projet,"-color.txt",sep="")
 	}
 	print("test stat")
 	finalPV <- NULL
@@ -660,11 +661,12 @@ if(dCluster==TRUE){
 	}
 		outfileColor<-paste(projet,"-04-filtre/",projet,"-colorSample.png",sep="")
 		species<-puceInfo$Species
-	ylim<-round(max(abs(-log10(pvalRaw))),0)
+	ylim<-round(max(abs(-log10(pvalRaw)),na.rm=TRUE),0)
 	ylim<-ylim+1
 	pathPNG<-as.character(treepath$student)
 	pathAnnot<-as.character(treepath$annotation)
 	info<-infoGeneAnot[as.character(row.names(m.filtered)),]
+	pvalRaw<-replace(pvalRaw,which(is.na(pvalRaw)),1)
 	graphFile<-clusterAnalyse(mat=m.filtered,info=info,treepath=treepath,comparaison=comparaison,f=frameFac,pvalRaw=pvalRaw,pathPNG=pathPNG,pathAnnot=pathAnnot,projet=projet,species=species,seuil=seuilPic,ylim=ylim)
 
 	print(graphFile)
