@@ -147,3 +147,16 @@ corUn<-function(x,y){
 	
 	return(r)	
 }
+graphExpress<-function(mat,probes){
+
+probesFac<-as.numeric(as.factor(as.character(unlist(probes))))
+rangeY<-range(mat)
+plot(mat[,1],ylim=rangeY
+
+for(i in 1:ncol(mat)){
+	points(unlist(mat[,i]),col=probesFac[i])
+	lines(unlist(mat[,i]),col=probesFac[i])
+} 	
+	
+	
+}

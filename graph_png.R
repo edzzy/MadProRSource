@@ -380,3 +380,76 @@ HTML_img<-function(image_file,html_file){
 	cat(balise_image,file=html_file,append=TRUE)
 	cat("\tTest</BODY>\n</HTML>",file=html_file,append=TRUE)
 }
+
+allGraphProbes<-function(mat,genes,fact,log=FALSE){
+	
+	for(i in 1:nrow(genes)){
+
+		gene<-as.character(unlist(genes))[i]
+		
+
+		# Matrice with expression and annotation for gene i
+		matGene<-mat[which(mat$GeneName == gene),]
+		if(nrow(matGene) != 0){
+
+		# matrice with expression only for gene i
+		matProbe<-matGene[,names(fact)]
+
+		if(log == TRUE){
+			matProbe<-log(matProbe)
+		}
+		
+		graphExpress(matProbe,matGene$ProbeName,fact,gene)
+		}else{
+			message<-paste(gene, " not in array",sep="")
+			print(message)
+			}
+
+
+		
+		}	
+}
+
+
+graphExpress<-function(mat,probes,fact,gene){
+
+
+  png(filename = paste(gene,".png",sep=""), width = 1300, height = 900,  bg = "white", res = NA)
+	#Nom
+	legendProbeName<-as.character(unique(as.factor(as.character(unlist(probes)))))
+	legendFactName<-as.character(unique(fact))
+	legendName<-c(legendProbeName,legendFactName)
+
+	#Col
+	legendProbeCol<-unique(as.numeric(as.factor(as.character(unlist(probes)))))
+	legendCol<-c(legendProbeCol,rep(1,length(unique(fact))))
+
+	#Pch
+	legendFactPch<-unique(as.numeric(fact))
+	legendPch<-c(rep(1,length(unique(unlist(probes)))),legendFactPch)
+
+
+
+
+	probesFac<-as.numeric(as.factor(as.character(unlist(probes))))
+	rangeY<-range(mat)
+	bottomarg = nchar(max(colnames(mat))) #nombre de ligne pour la marge du bas
+	rightmarg = nchar(max(as.character(probes))) #nombre de ligne pour la marge du bas
+	par(mar=c(bottomarg + 5,5,3,rightmarg+2),xpd=TRUE)
+	x<-unlist(mat[1,])
+	names(x)<-colnames(mat)
+	plot(x,ylim=rangeY,las="2",xlab="",ylab="Intensite",cex.lab=1.5,xaxt="n",pch=as.numeric(fact),main=gene)
+
+for(i in 1:nrow(mat)){
+	x<-unlist(mat[i,])
+	names(x)<-colnames(mat)
+	points(x,col=probesFac[i],pch=as.numeric(fact))
+	lines(x,col=probesFac[i])
+} 	
+	
+ axis(1,1:dim(mat)[2],labels=colnames(mat),las="2",cex.axis=1.5)
+ ylegend<-max(mat)
+     legend(ncol(mat)+1,ylegend,  legend=legendName,lwd=0.75,col=legendCol,pch=legendPch)
+    # legend(0,0,yjust=1, legend=legendName,lwd=1,cex=1.5,col=legendCol)
+	dev.off()
+}
